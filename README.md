@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SURV — Real-Time Interactive Audience Engagement Platform
 
-## Getting Started
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Knight2212/SURV)
+![Next.js](https://img.shields.io/badge/Next.js-16.4.2-black?logo=next.js)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.0-38bdf8?logo=tailwindcss)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-12-purple?logo=framer)
+![License](https://img.shields.io/badge/License-MIT-emerald)
 
-First, run the development server:
+> **SURV** is a modern, real-time audience engagement platform inspired by Vevox and Slido. Built with **Next.js 16**, **Tailwind CSS v4**, **Supabase Realtime**, **Framer Motion**, and **Google Gemini AI**.
+> 
+> 100% free to develop, run, and host on generous free tiers.
+
+---
+
+## ⚡ Instant Vercel Deployment
+
+Deploy SURV directly to Vercel with one click:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Knight2212/SURV)
+
+### Environment Variables on Vercel (Optional)
+When importing into Vercel, you can configure these environment variables:
+
+| Variable | Description | Default |
+|---|---|---|
+| `NEXT_PUBLIC_GEMINI_API_KEY` | Google Gemini API Key for AI quiz & poll generation | *Intelligent offline generator fallback* |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | *Local BroadcastChannel / WebSockets fallback* |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous API key | *Local store fallback* |
+
+---
+
+## 🚀 Key Features
+
+### 1. Three Dedicated Experiences
+- **Participant Mobile Web App (`/app/[pin]`)**: Frictionless zero-install web application for mobile and desktop. Instant voting, word clouds, 1-5 star ratings, anonymous Q&A submission, and self-paced surveys.
+- **Presenter Projector HUD (`/present/[pin]`)**: High-contrast stage projection display with dynamic joining instructions, high-resolution QR codes, keyboard shortcuts (`Space`, `Arrows`, `C`, `R`, `F`), and animated leaderboards.
+- **Host Command Center (`/host/[pin]`)**: Orchestration dashboard for launching polls, locking voting, revealing results, moderating audience questions, and batch generating quizzes with Gemini AI.
+
+### 2. Google Gemini AI Quiz & Poll Generator
+- Generate quizzes with timed challenges, correct answers, and word clouds in seconds.
+- Built-in preview, question selection, and 1-click batch import directly into the live room.
+- Includes an intelligent offline fallback when an API key is not yet configured.
+
+### 3. Dynamic Real-Time Visualizers
+- **Live Bar Charts**: Spring progress fills, leading badge indicators, and correct answer reveal styling.
+- **Dynamic Word Clouds**: Clustered multi-color tags with fluid scaling based on audience submission frequency.
+- **Rating Scales**: 1–5 star distribution visualizer with average score cards.
+- **Quiz Leaderboard**: Podium for top-3 participants with animated canvas confetti.
+
+---
+
+## 🛠 Tech Stack
+
+- **Framework**: [Next.js 16.4.2 (App Router & Turbopack)](https://nextjs.org/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Typography**: [Plus Jakarta Sans & JetBrains Mono (`next/font/google`)](https://fonts.google.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/) & [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
+- **Real-Time Data**: [Supabase Realtime](https://supabase.com/) & Web BroadcastChannel fallback
+- **Generative AI**: [Google Gemini AI](https://ai.google.dev/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+
+---
+
+## 💻 Local Development
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/Knight2212/SURV.git
+cd SURV
+npm install
+```
+
+Copy the environment example template:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🧪 Production Build
 
-## Learn More
+Verify the production build locally:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm run start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📄 License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT License &copy; 2026 SURV Interactive. Built for educators, speakers, and teams worldwide.
