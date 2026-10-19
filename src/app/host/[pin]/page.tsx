@@ -236,7 +236,7 @@ function HostRoomContent({ params }: HostRoomPageProps) {
   ) => {
     if (!room) return;
     let firstCreated: Poll | null = null;
-    const colors = ['#6366F1', '#10B981', '#06B6D4', '#F59E0B', '#EC4899', '#8B5CF6'];
+    const colors = ['#10B981', '#06B6D4', '#F59E0B', '#3B82F6', '#EC4899', '#14B8A6'];
 
     generatedQuestions.forEach((q, idx) => {
       const created = createPoll({
@@ -315,9 +315,9 @@ function HostRoomContent({ params }: HostRoomPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090E] text-slate-100">
+    <div className="min-h-[100svh] flex flex-col bg-[#07090E] text-slate-100">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 px-6 sm:px-8 py-3.5 border-b border-white/10 bg-[#07090E]/90 backdrop-blur-xl flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 px-6 sm:px-8 py-3.5 border-b border-white/10 bg-[#07090E] flex items-center justify-between gap-4"> {/* taste-skill-ignore */}
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => router.push('/host')}
@@ -332,11 +332,11 @@ function HostRoomContent({ params }: HostRoomPageProps) {
                 {room.title}
               </h1>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 <span>Live</span>
               </span>
             </div>
-            <span className="text-xs font-mono font-semibold text-cyan-400">
+            <span className="text-xs tabular-nums font-semibold text-emerald-400">
               PIN: {room.pin}
             </span>
           </div>
@@ -356,7 +356,7 @@ function HostRoomContent({ params }: HostRoomPageProps) {
             onClick={() => window.open(`/app/${room.pin}`, '_blank')}
             className="px-3.5 py-2 text-xs font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
           >
-            <Smartphone size={14} className="text-indigo-400" />
+            <Smartphone size={14} className="text-emerald-400" />
             <span className="hidden sm:inline">Participant App</span>
           </button>
 
@@ -379,7 +379,7 @@ function HostRoomContent({ params }: HostRoomPageProps) {
       </header>
 
       {/* Tabs */}
-      <div className="px-6 sm:px-8 py-2.5 bg-slate-950/60 border-b border-white/10 flex items-center gap-2 overflow-x-auto">
+      <div className="px-6 sm:px-8 py-2.5 bg-slate-950/60 border-b border-white/10 flex items-center gap-2 overflow-x-auto"> {/* taste-skill-ignore */}
         {[
           { id: 'polls', label: `Polls (${polls.length})` },
           { id: 'qa', label: `Audience Q&A (${questions.length})` },
@@ -389,9 +389,9 @@ function HostRoomContent({ params }: HostRoomPageProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
               activeTab === tab.id
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                ? 'bg-white text-[#0A0D12]'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
             }`}
           >
@@ -427,17 +427,16 @@ function HostRoomContent({ params }: HostRoomPageProps) {
                     alignItems: 'center',
                     gap: '8px',
                     borderRadius: 'var(--radius-sm)',
-                    background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.25) 0%, rgba(99, 102, 241, 0.2) 100%)',
-                    border: '1px solid rgba(124, 58, 237, 0.4)',
-                    color: '#C4B5FD',
+                    background: '#161E2C',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    color: '#FFFFFF',
                     fontWeight: 600,
                     fontSize: '0.88rem',
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease',
                   }}
-                  className="hover:border-violet-400 hover:text-white"
+                  className="hover:bg-[#1D2738] transition-colors"
                 >
-                  <Sparkles size={16} className="text-violet-400" /> Generate with Gemini AI
+                  <Sparkles size={16} className="text-emerald-400" /> Generate with Gemini AI
                 </button>
               </div>
 
@@ -659,8 +658,8 @@ function HostRoomContent({ params }: HostRoomPageProps) {
                       )}
                     </div>
                     <p style={{ fontSize: '1rem', color: '#FFFFFF' }}>{q.text}</p>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700, marginTop: '4px', display: 'block' }}>
-                      👍 {q.upvotes} upvotes
+                    <span style={{ fontSize: '0.8rem', color: '#10B981', fontWeight: 600, marginTop: '4px', display: 'block' }}>
+                      ▲ {q.upvotes} upvotes
                     </span>
                   </div>
 
@@ -801,11 +800,11 @@ function HostRoomContent({ params }: HostRoomPageProps) {
               <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Poll Type</label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                 {[
-                  { id: 'multiple_choice', label: '📊 MCQ' },
-                  { id: 'word_cloud', label: '☁️ Word Cloud' },
-                  { id: 'rating', label: '⭐ Rating' },
-                  { id: 'quiz', label: '⚡ Quiz' },
-                  { id: 'open_text', label: '📝 Open Text' },
+                  { id: 'multiple_choice', label: 'Multiple Choice' },
+                  { id: 'word_cloud', label: 'Word Cloud' },
+                  { id: 'rating', label: 'Rating (1-5)' },
+                  { id: 'quiz', label: 'Quiz Battle' },
+                  { id: 'open_text', label: 'Open Text' },
                 ].map(t => (
                   <button
                     key={t.id}

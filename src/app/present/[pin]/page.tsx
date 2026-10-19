@@ -204,10 +204,10 @@ function PresenterContent({ params }: PresenterPageProps) {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '100svh',
       display: 'flex',
       flexDirection: 'column',
-      background: 'radial-gradient(circle at 50% 20%, #0F172A 0%, #05070A 100%)',
+      background: '#070A10',
       color: '#FFFFFF',
       position: 'relative',
       overflow: 'hidden',
@@ -219,8 +219,7 @@ function PresenterContent({ params }: PresenterPageProps) {
         justifyContent: 'space-between',
         padding: '16px 36px',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        background: 'rgba(10, 15, 26, 0.85)',
-        backdropFilter: 'blur(16px)',
+        background: '#0D121B',
         zIndex: 30,
       }}>
         {/* Left: Branding & Room Title */}
@@ -251,21 +250,19 @@ function PresenterContent({ params }: PresenterPageProps) {
           padding: '8px 24px',
           borderRadius: 'var(--radius-full)',
           border: '1px solid rgba(255, 255, 255, 0.12)',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
         }}>
           <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
             Join at <strong style={{ color: '#FFFFFF' }}>surv.app</strong>
           </span>
           <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border-light)' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--secondary)', fontWeight: 600 }}>PIN:</span>
+            <span style={{ fontSize: '0.85rem', color: '#10B981', fontWeight: 600 }}>PIN:</span>
             <span style={{
               fontSize: '1.4rem',
               fontWeight: 900,
-              fontFamily: 'var(--font-mono)',
+              fontVariantNumeric: 'tabular-nums',
               letterSpacing: '0.08em',
               color: '#FFFFFF',
-              textShadow: '0 0 16px rgba(6, 182, 212, 0.5)',
             }}>
               {room.pin}
             </span>
@@ -442,11 +439,11 @@ function PresenterContent({ params }: PresenterPageProps) {
               width: '80px',
               height: '80px',
               borderRadius: '24px',
-              background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
+              background: '#121720',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 50px var(--primary-glow)',
             }}>
               <Sparkles size={40} color="#FFFFFF" />
             </div>
@@ -479,11 +476,10 @@ function PresenterContent({ params }: PresenterPageProps) {
           transform: 'translateX(-50%)',
           width: '90%',
           maxWidth: '850px',
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.95) 0%, rgba(79, 70, 229, 0.95) 100%)',
-          backdropFilter: 'blur(16px)',
+          background: '#161E2C',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
           padding: '16px 24px',
           borderRadius: 'var(--radius-lg)',
-          boxShadow: '0 12px 35px rgba(0, 0, 0, 0.6)',
           display: 'flex',
           alignItems: 'center',
           gap: '16px',

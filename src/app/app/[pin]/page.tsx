@@ -222,9 +222,9 @@ function ParticipantContent({ params }: ParticipantPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090E] text-slate-100">
+    <div className="min-h-[100svh] flex flex-col bg-[#07090E] text-slate-100">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 px-4 sm:px-6 py-3.5 border-b border-white/10 bg-[#07090E]/90 backdrop-blur-xl flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-40 px-4 sm:px-6 py-3.5 border-b border-white/10 bg-[#07090E] flex items-center justify-between gap-3"> {/* taste-skill-ignore */}
         <div className="flex items-center gap-2.5 min-w-0">
           <button
             onClick={() => router.push('/')}
@@ -237,7 +237,7 @@ function ParticipantContent({ params }: ParticipantPageProps) {
             <h1 className="text-sm sm:text-base font-extrabold text-white truncate max-w-[180px] sm:max-w-xs">
               {room.title}
             </h1>
-            <span className="text-xs font-mono font-semibold text-cyan-400">
+            <span className="text-xs tabular-nums font-semibold text-emerald-400">
               PIN: {room.pin}
             </span>
           </div>
@@ -246,10 +246,10 @@ function ParticipantContent({ params }: ParticipantPageProps) {
         {/* Participant Name Badge */}
         <button
           onClick={() => setIsEditingName(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-200 transition-all cursor-pointer"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
           title="Change your display name"
         >
-          <User size={13} className="text-indigo-400" />
+          <User size={13} className="text-emerald-400" />
           <span className="max-w-[90px] sm:max-w-[120px] truncate">
             {participantName}
           </span>
@@ -514,34 +514,34 @@ function ParticipantContent({ params }: ParticipantPageProps) {
       </main>
 
       {/* Bottom Sticky Tab Navigation */}
-      <nav className="fixed bottom-0 inset-x-0 z-50 max-w-lg mx-auto bg-[#07090E]/95 backdrop-blur-2xl border-t border-white/10 flex items-center justify-around py-2.5 px-4">
+      <nav className="fixed bottom-0 inset-x-0 z-50 max-w-lg mx-auto bg-[#0A0D12] border-t border-white/10 flex items-center justify-around py-2.5 px-4"> {/* taste-skill-ignore */}
         <button
           onClick={() => setActiveTab('polls')}
           className={`flex flex-col items-center gap-1 relative transition-colors cursor-pointer ${
-            activeTab === 'polls' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            activeTab === 'polls' ? 'text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
           }`}
         >
           <BarChart2 size={20} />
           <span className="text-[11px]">Polls</span>
           {activePoll && (
-            <span className="absolute -top-0.5 right-1 w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
+            <span className="absolute -top-0.5 right-1 w-2 h-2 rounded-full bg-emerald-400" />
           )}
         </button>
 
         <button
           onClick={() => setActiveTab('qa')}
           className={`flex flex-col items-center gap-1 transition-colors cursor-pointer ${
-            activeTab === 'qa' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            activeTab === 'qa' ? 'text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
           }`}
         >
           <MessageSquare size={20} />
-          <span className="text-[11px]">Q&A ({questions.length})</span>
+          <span className="text-[11px]">Q&amp;A ({questions.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('surveys')}
           className={`flex flex-col items-center gap-1 transition-colors cursor-pointer ${
-            activeTab === 'surveys' ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+            activeTab === 'surveys' ? 'text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
           }`}
         >
           <ClipboardList size={20} />

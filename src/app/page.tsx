@@ -2,71 +2,70 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Radio,
-  Users,
-  Sparkles,
-  Monitor,
   ArrowRight,
-  BarChart3,
-  MessageSquare,
-  Award,
-  Smartphone,
+  Monitor,
   CheckCircle2,
-  Lock,
-  Flame,
-  Globe,
-  ShieldCheck,
   Check,
-  ChevronRight,
-  TrendingUp,
-  Clock,
-  Layers,
+  Smartphone,
+  Plus,
+  Radio,
+  Sparkles,
+  MessageSquare,
+  BarChart3,
   Star,
+  Users,
+  Copy,
 } from 'lucide-react';
 import { initializeStore } from '@/lib/store';
 
-// Interactive Mock Demo Card data
-const DEMO_POLL_OPTIONS = [
-  { id: 'opt-a', label: 'A', text: 'Cloud-Native Microservices', votes: 142, color: '#7C3AED' },
-  { id: 'opt-b', label: 'B', text: 'Event-Driven Architecture', votes: 118, color: '#06B6D4' },
-  { id: 'opt-c', label: 'C', text: 'Serverless Edge Functions', votes: 84, color: '#10B981' },
-  { id: 'opt-d', label: 'D', text: 'Modular Monolith with Turbopack', votes: 62, color: '#F59E0B' },
+// Live interactive hero options
+interface HeroOption {
+  id: string;
+  label: string;
+  text: string;
+  votes: number;
+}
+
+const INITIAL_HERO_OPTIONS: HeroOption[] = [
+  { id: 'opt-a', label: 'A', text: 'Distributed Event-Driven Architecture', votes: 148 },
+  { id: 'opt-b', label: 'B', text: 'Serverless Edge Functions & Fastly', votes: 112 },
+  { id: 'opt-c', label: 'C', text: 'Modular Monolith with Rust Microservices', votes: 89 },
+  { id: 'opt-d', label: 'D', text: 'GraphQL Federation with Apollo Router', votes: 57 },
 ];
 
 const USE_CASES = [
   {
-    id: 'education',
-    title: 'Higher Education & Lectures',
-    tag: 'Active Learning',
-    description: 'Transform 300-seat lecture halls into interactive learning spaces. Gauge comprehension instantly without student hesitation.',
-    metrics: ['94% student participation', '100% anonymous voting', 'Zero app downloads'],
-    quote: 'Students who never raised their hands now lead the discussion through anonymous polls.',
+    id: 'lectures',
+    title: 'University Lectures & Large Classes',
+    scope: '300-seat lecture halls',
+    claim: 'Zero student friction: everyone votes from their browser in three seconds.',
+    description: 'Professors check live concept comprehension midway through lectures. Quiet students participate freely through anonymous polls without self-consciousness.',
+    specs: ['100% anonymous voting', 'Instant QR code joining', 'Live lecture comprehension checks'],
   },
   {
-    id: 'corporate',
-    title: 'All-Hands & Town Halls',
-    tag: 'Executive Alignment',
-    description: 'Empower employees to ask difficult, candid questions with crowdsourced upvoting. Leaders address top concerns transparently.',
-    metrics: ['Real-time question upvoting', 'Presenter screen moderation', 'Instant feedback polls'],
-    quote: 'Our executive Q&A sessions became 10x more transparent and impactful in one week.',
-  },
-  {
-    id: 'workshops',
-    title: 'Training & Design Sprints',
-    tag: 'Continuous Engagement',
-    description: 'Break the monotony of long presentations with word clouds, instant knowledge checks, and timed quiz battles with leaderboards.',
-    metrics: ['Gemini AI question generation', 'Dynamic word cloud cluster', 'Podium celebrations'],
-    quote: 'The AI quiz generator crafted our entire post-training assessment in 5 seconds flat.',
+    id: 'townhalls',
+    title: 'Company All-Hands & Executive Q&A',
+    scope: 'Distributed teams & hybrid summits',
+    claim: 'Crowdsourced upvoting surfaces the hardest questions first.',
+    description: 'Employees post questions throughout presentations. Real-time upvoting organizes topics organically, giving executive leadership unfiltered visibility into what people care about.',
+    specs: ['Upvoting with duplicate filtering', 'Host moderation controls', 'Presenter screen toggle'],
   },
   {
     id: 'conferences',
-    title: 'Hybrid & Global Conferences',
-    tag: 'Massive Scale',
-    description: 'Connect in-person audience members and virtual attendees on a single synchronized stage with sub-second WebSocket latency.',
-    metrics: ['Instant QR code joining', 'Universal device support', 'Unlimited participants'],
-    quote: 'Seamless connection across both in-room projector screens and remote laptop viewers.',
+    title: 'Tech Keynotes & Global Conferences',
+    scope: 'Thousands of live attendees',
+    claim: 'Sub-second real-time sync that never chokes on crowded venue Wi-Fi.',
+    description: 'Engineered on lightweight WebSocket connections and optimized payloads. Thousands of attendees cast votes simultaneously with instantaneous bar chart transitions on the main stage screen.',
+    specs: ['Sub-second stage synchronization', 'Full keyboard navigation shortcuts', 'Zero native app downloads'],
+  },
+  {
+    id: 'workshops',
+    title: 'Interactive Workshops & Training',
+    scope: 'Team offsites & agile sprints',
+    claim: 'Gemini AI crafts contextual assessment quizzes from a single prompt.',
+    description: 'Transform passive slide lectures into active learning challenges. Synthesize questions, multiple choices, and correct answers with built-in Google Gemini in five seconds.',
+    specs: ['Gemini AI instant question synthesis', 'Animated podium celebrations', 'Exportable session analytics'],
   },
 ];
 
@@ -76,9 +75,67 @@ export default function HomePage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [activeUseCase, setActiveUseCase] = useState(0);
 
-  // Interactive Live Hero Simulator State
+  // Live Interactive Hero Poll Simulator
+  const [heroVotes, setHeroVotes] = useState<HeroOption[]>(INITIAL_HERO_OPTIONS);
   const [selectedHeroVote, setSelectedHeroVote] = useState<string>('opt-a');
-  const [heroVotes, setHeroVotes] = useState(DEMO_POLL_OPTIONS);
+  const [hasVotedHero, setHasVotedHero] = useState<boolean>(true);
+
+  // Live Interactive Capability 1: Word Cloud & Rating Simulator
+  const [cloudWords, setCloudWords] = useState([
+    { text: 'Low Latency', count: 48, size: 'text-2xl font-bold text-white' },
+    { text: 'WebSockets', count: 39, size: 'text-xl font-semibold text-emerald-400' },
+    { text: 'Zero App', count: 34, size: 'text-lg font-medium text-slate-200' },
+    { text: 'Instant QR', count: 28, size: 'text-base text-slate-300' },
+    { text: 'Anonymous', count: 24, size: 'text-sm text-slate-400' },
+    { text: 'Open Source', count: 21, size: 'text-xs text-slate-400' },
+  ]);
+  const [newWordInput, setNewWordInput] = useState('');
+  const [selectedRating, setSelectedRating] = useState<number>(5);
+
+  // Live Interactive Capability 2: Q&A Upvote Simulator
+  const [qaItems, setQaItems] = useState([
+    {
+      id: 'qa-1',
+      question: 'How does the WebSocket architecture maintain sub-second latency across 2,000+ simultaneous connections?',
+      author: 'Staff Engineer (Anonymous)',
+      votes: 84,
+      upvoted: true,
+      answered: true,
+    },
+    {
+      id: 'qa-2',
+      question: 'Can attendees submit questions without entering an email address or creating an account?',
+      author: 'Audience Member',
+      votes: 52,
+      upvoted: false,
+      answered: false,
+    },
+    {
+      id: 'qa-3',
+      question: 'Does the host export raw session data as CSV for post-event analysis?',
+      author: 'Conference Organizer',
+      votes: 37,
+      upvoted: false,
+      answered: false,
+    },
+  ]);
+
+  // Live Interactive Capability 3: AI Quiz Generator Simulator
+  const [aiTopic, setAiTopic] = useState('Kubernetes Orchestration');
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [aiQuizPreview, setAiQuizPreview] = useState({
+    question: 'What is the primary role of the Kubernetes Kube-Scheduler component?',
+    options: [
+      { text: 'Assigning unassigned pods to healthy worker nodes based on resource constraints', correct: true },
+      { text: 'Maintaining cluster network routing tables and DNS discovery', correct: false },
+      { text: 'Managing container image caching across local nodes', correct: false },
+      { text: 'Executing container build pipelines inside isolated namespaces', correct: false },
+    ],
+  });
+
+  // Closing CTA creator state
+  const [createTitle, setCreateTitle] = useState('Q4 Engineering Architecture Review');
+  const [createMode, setCreateMode] = useState<'polls' | 'quiz' | 'qa'>('polls');
 
   useEffect(() => {
     initializeStore();
@@ -100,7 +157,7 @@ export default function HomePage() {
     e.preventDefault();
     const clean = pinInput.replace(/[^0-9]/g, '');
     if (clean.length < 6) {
-      setErrorMsg('Please enter a valid 9-digit session PIN');
+      setErrorMsg('Enter a valid 9-digit session PIN');
       return;
     }
     router.push(`/app/${pinInput}`);
@@ -109,427 +166,559 @@ export default function HomePage() {
   const handleHeroVote = (optId: string) => {
     if (selectedHeroVote === optId) return;
     setSelectedHeroVote(optId);
+    setHasVotedHero(true);
     setHeroVotes(prev =>
       prev.map(opt => (opt.id === optId ? { ...opt, votes: opt.votes + 1 } : opt))
     );
   };
 
+  const handleAddCloudWord = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newWordInput.trim()) return;
+    const clean = newWordInput.trim();
+    setCloudWords(prev => [
+      { text: clean, count: 18, size: 'text-xl font-bold text-white' },
+      ...prev.slice(0, 5),
+    ]);
+    setNewWordInput('');
+  };
+
+  const handleToggleQaUpvote = (id: string) => {
+    setQaItems(prev =>
+      prev.map(item => {
+        if (item.id === id) {
+          const nextUpvoted = !item.upvoted;
+          return {
+            ...item,
+            upvoted: nextUpvoted,
+            votes: nextUpvoted ? item.votes + 1 : item.votes - 1,
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleGenerateAiSample = () => {
+    setIsGeneratingAi(true);
+    setTimeout(() => {
+      setAiQuizPreview({
+        question: `How does ${aiTopic || 'Modern Web Architecture'} prevent cascading network failures?`,
+        options: [
+          { text: 'Circuit breakers with exponential backoff and jittered retries', correct: true },
+          { text: 'Synchronous blocking RPC calls across microservices', correct: false },
+          { text: 'Disabling health check probes during high request load', correct: false },
+          { text: 'Increasing global database write connection pools', correct: false },
+        ],
+      });
+      setIsGeneratingAi(false);
+    }, 450);
+  };
+
+  const handleLaunchSession = () => {
+    router.push('/host');
+  };
+
   const totalHeroVotes = heroVotes.reduce((acc, curr) => acc + curr.votes, 0);
 
   return (
-    <div className="min-h-screen bg-[#070A10] text-[#F8FAFC] selection:bg-violet-600/30 selection:text-violet-200">
-      {/* Refined subtle background grid pattern */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] z-0" />
-
-      {/* Ambient center spotlight */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] bg-gradient-to-b from-violet-600/10 via-indigo-600/5 to-transparent blur-[140px] pointer-events-none z-0" />
-
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#070A10]/80 backdrop-blur-xl">
+    <div className="min-h-[100svh] bg-[#0A0D12] text-[#F8FAFC]">
+      {/* Top Navigation */}
+      <header className="sticky top-0 z-50 bg-[#0A0D12] border-b border-white/[0.08]"> {/* taste-skill-ignore */}
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
           <div
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-2.5 cursor-pointer"
             onClick={() => router.push('/')}
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-600/20 group-hover:scale-105 transition-transform">
-              <Radio size={16} className="text-white" />
+            <div className="w-7 h-7 rounded bg-white text-[#0A0D12] flex items-center justify-center font-bold text-sm">
+              S
             </div>
-            <span className="text-lg font-black tracking-tight text-white">
-              SURV<span className="text-violet-400">.</span>
+            <span className="text-base font-semibold tracking-tight text-white">
+              SURV
+            </span>
+            <span className="text-xs text-slate-500 hidden sm:inline ml-1">
+              / live audience platform
             </span>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-400">
-            <a href="#demo" className="hover:text-white transition-colors">
-              Live Showcase
+          <nav className="hidden md:flex items-center gap-8 text-xs text-slate-400">
+            <a href="#simulator" className="hover:text-white transition-colors">
+              Live Demo
             </a>
-            <a href="#features" className="hover:text-white transition-colors">
-              Platform Features
+            <a href="#capabilities" className="hover:text-white transition-colors">
+              Capabilities
             </a>
-            <a href="#usecases" className="hover:text-white transition-colors">
+            <a href="#solutions" className="hover:text-white transition-colors">
               Solutions
             </a>
-            <a href="#comparison" className="hover:text-white transition-colors">
-              Why Free?
+            <a href="#guarantee" className="hover:text-white transition-colors">
+              Free Guarantee
             </a>
           </nav>
 
-          {/* Action CTAs */}
           <div className="flex items-center gap-3">
             <button
-              onClick={() => router.push('/host')}
-              className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-lg hover:bg-white/[0.06] transition-all cursor-pointer"
+              onClick={() => router.push('/present/123-456-789')}
+              className="px-3 py-1.5 text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] rounded transition-colors cursor-pointer"
             >
-              Host Dashboard
+              Stage Projector
             </button>
             <button
-              onClick={() => router.push('/present/123-456-789')}
-              className="px-4 py-2 text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 rounded-lg shadow-md shadow-violet-600/25 flex items-center gap-1.5 transition-all cursor-pointer"
+              onClick={() => router.push('/host')}
+              className="px-4 py-1.5 text-xs font-semibold text-[#0A0D12] bg-white hover:bg-slate-200 rounded transition-colors cursor-pointer"
             >
-              <Monitor size={14} />
-              <span>Presenter Screen</span>
+              Start Session
             </button>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative z-10 pt-20 pb-16 px-6 max-w-5xl mx-auto text-center">
-        {/* Announcement Pill */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold mb-6 shadow-sm">
-          <Sparkles size={13} className="text-violet-400" />
-          <span>Next-Generation Audience Response Platform</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-        </div>
+      {/* Hero Section: The Product Performs */}
+      <section className="pt-16 pb-20 px-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          {/* Hero Left Column (Copy & Direct Entry) */}
+          <div className="lg:col-span-5 space-y-6 pt-2">
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-bold text-white tracking-[-0.03em] leading-[1.08]">
+              Live audience polls that people actually answer.
+            </h1>
 
-        {/* Headline */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.08] text-white mb-6">
-          Transform presentations into{' '}
-          <span className="bg-gradient-to-r from-violet-400 via-indigo-300 to-emerald-300 bg-clip-text text-transparent">
-            live conversations.
-          </span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-10">
-          The modern, 100% free alternative to Vevox and Slido. Real-time polling, animated word clouds, anonymous Q&A, and gamified quizzes with zero app downloads.
-        </p>
-
-        {/* Single Unified Action Hub */}
-        <div className="max-w-xl mx-auto p-2 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl shadow-2xl shadow-black/50 mb-6">
-          <form onSubmit={handleJoin} className="flex flex-col sm:flex-row items-center gap-2">
-            <div className="flex-1 w-full flex items-center px-4 py-2.5 bg-slate-950/70 border border-white/10 rounded-xl focus-within:border-violet-500/60 transition-colors">
-              <span className="text-xs font-bold font-mono text-slate-500 mr-2 tracking-wider">
-                PIN:
-              </span>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={pinInput}
-                onChange={handlePinChange}
-                placeholder="123-456-789"
-                className="w-full bg-transparent text-sm sm:text-base font-mono font-bold text-white placeholder-slate-600 focus:outline-none tracking-widest"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full sm:w-auto px-6 py-3 font-semibold text-xs sm:text-sm text-white bg-violet-600 hover:bg-violet-500 rounded-xl shadow-lg shadow-violet-600/30 flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap"
-            >
-              <span>Join Session</span>
-              <ArrowRight size={15} />
-            </button>
-          </form>
-
-          {errorMsg && (
-            <p className="text-xs text-rose-400 text-center mt-2 font-medium">
-              {errorMsg}
+            <p className="text-base text-slate-400 leading-relaxed max-w-md">
+              Questions, dynamic word clouds, and anonymous Q&amp;A on your room screen. Attendees join in three seconds on their phones with a six-digit code. Zero app downloads, zero logins.
             </p>
-          )}
-        </div>
 
-        {/* Quick Launch Demo */}
-        <div className="flex items-center justify-center gap-6 text-xs text-slate-400">
-          <span>Or explore ready-to-test sessions:</span>
-          <button
-            onClick={() => router.push('/app/123-456-789')}
-            className="text-violet-400 hover:text-violet-300 font-semibold flex items-center gap-1 cursor-pointer"
-          >
-            <Smartphone size={13} /> Participant App
-          </button>
-          <span className="text-slate-600">•</span>
-          <button
-            onClick={() => router.push('/present/123-456-789')}
-            className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 cursor-pointer"
-          >
-            <Monitor size={13} /> Presenter Projector
-          </button>
-        </div>
-      </section>
-
-      {/* Interactive Live Product Arena (Dual-Screen Simulation) */}
-      <section id="demo" className="relative z-10 py-12 px-6 max-w-6xl mx-auto">
-        <div className="rounded-3xl bg-[#0D121D] border border-white/10 shadow-2xl overflow-hidden">
-          {/* Mock Window Top Bar */}
-          <div className="px-5 py-3.5 bg-slate-900/90 border-b border-white/[0.08] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-rose-500/80" />
-              <span className="w-3 h-3 rounded-full bg-amber-500/80" />
-              <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
-              <span className="text-xs font-mono text-slate-400 ml-2 hidden sm:inline">
-                SURV Live Stage Simulator • PIN 123-456-789
+            {/* Direct Join Box */}
+            <div className="p-4 rounded-xl bg-[#121720] border border-white/[0.08] space-y-3 max-w-md">
+              <span className="text-xs text-slate-400 block font-medium">
+                Enter room code to join live session:
               </span>
+
+              <form onSubmit={handleJoin} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={pinInput}
+                  onChange={handlePinChange}
+                  placeholder="123-456-789"
+                  className="flex-1 bg-[#0A0D12] border border-white/[0.12] rounded px-3 py-2 text-sm tabular-nums text-white placeholder-slate-600 focus:outline-none focus:border-white transition-colors"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-xs font-semibold text-[#0A0D12] bg-white hover:bg-slate-200 rounded flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <span>Join</span>
+                  <ArrowRight size={13} />
+                </button>
+              </form>
+
+              {errorMsg && (
+                <p className="text-xs text-rose-400 font-medium">{errorMsg}</p>
+              )}
+
+              <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-slate-400"> {/* taste-skill-ignore */}
+                <span>Presenter testing?</span>
+                <button
+                  type="button"
+                  onClick={() => router.push('/host')}
+                  className="text-white hover:underline font-medium cursor-pointer"
+                >
+                  Create host session &rarr;
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                <span>Synchronized Real-Time</span>
+            <div className="flex items-center gap-4 text-xs text-slate-500">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+                Sub-second WebSockets
               </span>
+              <span>&bull;</span>
+              <span>100% Free &amp; Unlimited</span>
+              <span>&bull;</span>
+              <span>No App Required</span>
             </div>
           </div>
 
-          {/* Interactive Split Arena */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-white/[0.08]">
-            {/* Left: Stage Projector Screen (7 Cols) */}
-            <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-violet-400 flex items-center gap-1.5">
-                    <Monitor size={13} /> Stage Projection View
+          {/* Hero Right Column: The Working Product Performs (Dual-Screen Simulator) */}
+          <div
+            id="simulator"
+            data-ui
+            className="lg:col-span-7 bg-[#121720] rounded-2xl border border-white/[0.08] overflow-hidden"
+          >
+            {/* Simulator Stage Header */}
+            <div className="px-5 py-3 bg-[#161E2C] border-b border-white/[0.08] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+                <span className="text-xs font-medium text-white">Live Simulator</span>
+                <span className="text-xs text-slate-400 tabular-nums">PIN 123-456-789</span>
+              </div>
+              <span className="text-xs text-slate-400 tabular-nums">
+                {totalHeroVotes} votes recorded
+              </span>
+            </div>
+
+            {/* Split Screen Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-white/[0.08]"> {/* taste-skill-ignore */}
+              {/* Left: Stage Projector Display (7 Cols) */}
+              <div className="md:col-span-7 p-6 space-y-6">
+                <div>
+                  <span className="text-xs text-slate-400 block mb-1">
+                    Stage Screen &bull; Poll #1
                   </span>
-                  <span className="text-xs font-mono text-slate-400">
-                    {totalHeroVotes} Live Responses
-                  </span>
+                  <h3 className="text-base font-semibold text-white leading-snug">
+                    Which architecture pattern should our engineering team prioritize for Q4?
+                  </h3>
                 </div>
 
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-6 leading-snug">
-                  Which tech architecture should our engineering team adopt for Q4?
-                </h3>
-
-                {/* Animated Bars */}
-                <div className="space-y-3.5">
+                {/* Live Bar Chart */}
+                <div className="space-y-3">
                   {heroVotes.map(opt => {
-                    const percentage = Math.round((opt.votes / totalHeroVotes) * 100);
+                    const pct = Math.round((opt.votes / totalHeroVotes) * 100);
                     const isLeading = opt.id === 'opt-a';
 
                     return (
-                      <div key={opt.id} className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs font-semibold">
-                          <span className="text-slate-300 flex items-center gap-2">
-                            <span className="w-5 h-5 rounded bg-white/10 flex items-center justify-center font-bold text-[10px] text-white">
+                      <div key={opt.id} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-200 flex items-center gap-2">
+                            <span className="w-4 h-4 rounded bg-white/10 text-white flex items-center justify-center text-[10px] font-bold">
                               {opt.label}
                             </span>
-                            {opt.text}
+                            <span className="truncate max-w-[210px]">{opt.text}</span>
                             {isLeading && (
-                              <span className="text-[10px] text-violet-400 font-bold bg-violet-500/10 px-1.5 py-0.5 rounded border border-violet-500/20">
+                              <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1 rounded">
                                 Leading
                               </span>
                             )}
                           </span>
-                          <span className="font-mono text-slate-400">
-                            <strong className="text-white font-bold">{percentage}%</strong> ({opt.votes})
+                          <span className="text-slate-400 tabular-nums">
+                            <strong className="text-white">{pct}%</strong> ({opt.votes})
                           </span>
                         </div>
 
-                        {/* Progress track */}
-                        <div className="h-3 w-full rounded-full bg-white/5 overflow-hidden">
+                        <div className="h-2 w-full rounded bg-white/5 overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-500 transition-all duration-500 ease-out"
-                            style={{ width: `${percentage}%` }}
+                            className="h-full rounded bg-white transition-all duration-300 ease-out"
+                            style={{ width: `${pct}%` }}
                           />
                         </div>
                       </div>
                     );
                   })}
                 </div>
+
+                <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-slate-500"> {/* taste-skill-ignore */}
+                  <span>Press Space to advance poll</span>
+                  <span className="tabular-nums">Audience sync: 42ms</span>
+                </div>
               </div>
 
-              <div className="mt-8 pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs text-slate-500">
-                <span>Presenter Mode with auto-hiding controls</span>
-                <span className="font-mono text-slate-400">Press Space for Next Poll</span>
+              {/* Right: Attendee Phone Vote Card (5 Cols) */}
+              <div className="md:col-span-5 p-6 bg-[#0E131B] flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-white flex items-center gap-1.5">
+                      <Smartphone size={13} className="text-emerald-400" />
+                      Attendee Phone
+                    </span>
+                    <span className="text-[11px] text-slate-400">Click to vote</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {heroVotes.map(opt => {
+                      const isSelected = selectedHeroVote === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => handleHeroVote(opt.id)}
+                          className={`w-full flex items-center justify-between p-2.5 rounded border text-xs text-left transition-colors cursor-pointer ${
+                            isSelected
+                              ? 'bg-white text-[#0A0D12] border-white font-semibold'
+                              : 'bg-[#121720] border-white/[0.08] text-slate-300 hover:bg-[#171F2C]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold ${
+                                isSelected ? 'bg-[#0A0D12] text-white' : 'bg-white/10 text-slate-300'
+                              }`}
+                            >
+                              {opt.label}
+                            </span>
+                            <span className="truncate max-w-[150px]">{opt.text}</span>
+                          </div>
+                          {isSelected && <Check size={14} className="shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-slate-500 leading-normal">
+                  Attendees scan the stage QR code or visit the URL on any browser. No account sign-up.
+                </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Right: Participant Interactive Phone Preview (5 Cols) */}
-            <div className="lg:col-span-5 p-6 sm:p-8 bg-slate-950/40 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                    <Smartphone size={13} /> Participant Phone (Interactive)
+      {/* Capabilities: Real Working Interface Fragments (5/7 Row Sequences) */}
+      <section id="capabilities" className="py-24 px-6 max-w-7xl mx-auto space-y-20">
+        <div>
+          <span className="text-xs text-slate-400 font-medium block mb-2">
+            Platform Capabilities
+          </span>
+          <h2 className="text-3xl font-bold text-white tracking-tight">
+            Built for high-stakes presentations.
+          </h2>
+        </div>
+
+        {/* Capability 1: Dynamic Word Cloud & Rating Breakdown */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-5 space-y-4">
+            <h3 className="text-2xl font-bold text-white">
+              Dynamic word clouds that scale as the room speaks.
+            </h3>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Ask open-ended questions like &quot;What is our biggest bottleneck?&quot; or &quot;Describe our product in one word.&quot; Words cluster and resize dynamically as repeated terms arrive from the crowd.
+            </p>
+            <div className="pt-2 text-xs text-slate-400 space-y-1">
+              <div>&bull; Instant deduplication &amp; frequency weighting</div>
+              <div>&bull; Profanity filtering &amp; host word moderation</div>
+              <div>&bull; Paired 5-star satisfaction breakdown</div>
+            </div>
+          </div>
+
+          <div data-ui className="lg:col-span-7 p-6 rounded-2xl bg-[#121720] border border-white/[0.08] space-y-6">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]"> {/* taste-skill-ignore */}
+              <span className="text-xs font-semibold text-white">
+                Live Cloud &amp; Rating Preview
+              </span>
+              <span className="text-xs text-slate-400 tabular-nums">312 submissions</span>
+            </div>
+
+            {/* Live Word Cloud Display */}
+            <div className="p-6 rounded-xl bg-[#0A0D12] border border-white/[0.06] flex flex-wrap items-center justify-center gap-4 min-h-[140px]">
+              {cloudWords.map((cw, idx) => (
+                <span
+                  key={idx}
+                  className={`${cw.size} transition-all duration-300 hover:text-white cursor-default`}
+                >
+                  {cw.text}
+                </span>
+              ))}
+            </div>
+
+            {/* Interactive Word Submitter & Star Rating */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <form onSubmit={handleAddCloudWord} className="space-y-1.5">
+                <span className="text-[11px] text-slate-400">Add test word to cloud:</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newWordInput}
+                    onChange={e => setNewWordInput(e.target.value)}
+                    placeholder="e.g. Scalability"
+                    className="flex-1 bg-[#0A0D12] border border-white/[0.12] rounded px-2.5 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-white"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 text-xs font-medium text-[#0A0D12] bg-white rounded cursor-pointer"
+                  >
+                    Add
+                  </button>
+                </div>
+              </form>
+
+              <div className="space-y-1.5">
+                <span className="text-[11px] text-slate-400">Cast test 5-star rating:</span>
+                <div className="flex items-center gap-1.5 py-1">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setSelectedRating(star)}
+                      className="p-1 text-slate-500 hover:text-amber-400 transition-colors cursor-pointer"
+                    >
+                      <Star
+                        size={18}
+                        className={star <= selectedRating ? 'text-amber-400 fill-amber-400' : ''}
+                      />
+                    </button>
+                  ))}
+                  <span className="text-xs tabular-nums text-white ml-2">
+                    {selectedRating}.0 / 5.0 (98% approval)
                   </span>
-                  <span className="text-xs text-slate-400">Click to cast vote</span>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-2.5">
-                  <p className="text-xs font-semibold text-slate-400 mb-3">
-                    Tap an option below to simulate live participant voting:
-                  </p>
-
-                  {heroVotes.map(opt => {
-                    const isSelected = selectedHeroVote === opt.id;
-
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => handleHeroVote(opt.id)}
-                        className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-violet-600/20 border-violet-500 text-white shadow-sm'
-                            : 'bg-white/[0.02] border-white/[0.08] text-slate-300 hover:bg-white/[0.05]'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span
-                            className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-[11px] ${
-                              isSelected ? 'bg-violet-600 text-white' : 'bg-white/10 text-slate-400'
-                            }`}
-                          >
-                            {opt.label}
-                          </span>
-                          <span>{opt.text}</span>
-                        </div>
-
-                        {isSelected && (
-                          <CheckCircle2 size={16} className="text-violet-400 shrink-0" />
-                        )}
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
-
-              <p className="text-xs text-slate-500 mt-6 text-center">
-                Audience members scan the QR code and vote with zero install required.
-              </p>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Neo-Minimalist Bento Grid Features */}
-      <section id="features" className="relative z-10 py-20 px-6 max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <span className="text-xs font-bold uppercase tracking-wider text-violet-400 mb-2 block">
-            Comprehensive Audience Tooling
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Everything modern presenters need.
-          </h2>
+        {/* Capability 2: Live Anonymous Q&A Moderation */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div data-ui className="lg:col-span-7 p-6 rounded-2xl bg-[#121720] border border-white/[0.08] space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]"> {/* taste-skill-ignore */}
+              <span className="text-xs font-semibold text-white">
+                Live Q&amp;A Feed &bull; Top Questions First
+              </span>
+              <span className="text-xs text-slate-400">Sorted by Upvotes</span>
+            </div>
+
+            <div className="space-y-2.5">
+              {qaItems.map(item => (
+                <div
+                  key={item.id}
+                  className="p-3.5 rounded-xl bg-[#0A0D12] border border-white/[0.06] flex items-start justify-between gap-4"
+                >
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-white leading-relaxed">
+                      {item.question}
+                    </p>
+                    <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                      <span>{item.author}</span>
+                      {item.answered && (
+                        <span className="text-emerald-400 font-medium">
+                          &bull; Answered on stage
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleQaUpvote(item.id)}
+                    className={`px-2.5 py-1.5 rounded border text-xs tabular-nums font-medium flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 ${
+                      item.upvoted
+                        ? 'bg-white text-[#0A0D12] border-white'
+                        : 'bg-[#121720] text-slate-300 border-white/[0.1] hover:bg-[#171F2C]'
+                    }`}
+                  >
+                    <span>▲</span>
+                    <span>{item.votes}</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-2 flex items-center justify-between text-xs text-slate-500">
+              <span>Presenter can archive, pin, or highlight questions in real time</span>
+              <span>Anonymous submission supported</span>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5 space-y-4">
+            <h3 className="text-2xl font-bold text-white">
+              Crowdsourced Q&amp;A that brings real transparency.
+            </h3>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              In company all-hands or town halls, employees hesitate to ask tough questions out loud. SURV lets attendees post anonymously and upvote pressing topics, ensuring leaders address what the room actually wants answered.
+            </p>
+            <div className="pt-2 text-xs text-slate-400 space-y-1">
+              <div>&bull; Anonymous or attributed submissions</div>
+              <div>&bull; 1-click presenter spotlight toggle</div>
+              <div>&bull; Real-time duplicate moderation</div>
+            </div>
+          </div>
         </div>
 
-        {/* Real Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-          {/* Bento Tile 1: Live Visualizers (Span 8) */}
-          <div className="md:col-span-8 p-7 rounded-3xl bg-[#0D121D] border border-white/10 flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center mb-4">
-                <BarChart3 size={20} />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                Real-Time Dynamic Visualizers
-              </h3>
-              <p className="text-sm text-slate-400 max-w-lg mb-6 leading-relaxed">
-                Choose between animated bar graphs with correct-answer reveals, dynamic word clouds with fluid text scaling, or 5-star rating breakdowns.
-              </p>
-            </div>
-
-            {/* Visualizer Mini Mock */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-white/[0.06]">
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
-                <span className="text-xs font-bold text-slate-300 block mb-1">Bar Charts</span>
-                <span className="text-[11px] text-slate-500">Live spring-eased progress percentages</span>
-              </div>
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
-                <span className="text-xs font-bold text-slate-300 block mb-1">Word Clouds</span>
-                <span className="text-[11px] text-slate-500">Auto-clustered multi-color phrase tags</span>
-              </div>
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
-                <span className="text-xs font-bold text-slate-300 block mb-1">5-Star Ratings</span>
-                <span className="text-[11px] text-slate-500">Satisfaction scorecards & distributions</span>
-              </div>
+        {/* Capability 3: Google Gemini AI Quiz Synthesis */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-5 space-y-4">
+            <h3 className="text-2xl font-bold text-white">
+              Synthesize complete quizzes with Google Gemini AI.
+            </h3>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Don&apos;t spend hours formatting quiz slides before a lecture or training session. Provide a single subject or lecture outline, and the built-in Gemini engine constructs complete questions, believable distractors, and correct answers in seconds.
+            </p>
+            <div className="pt-2 text-xs text-slate-400 space-y-1">
+              <div>&bull; Free Google Gemini API integration</div>
+              <div>&bull; Automated multiple-choice options with explanations</div>
+              <div>&bull; Timed gamified quiz mode with podium celebration</div>
             </div>
           </div>
 
-          {/* Bento Tile 2: Gemini AI Engine (Span 4) */}
-          <div className="md:col-span-4 p-7 rounded-3xl bg-[#0D121D] border border-violet-500/30 flex flex-col justify-between relative overflow-hidden shadow-lg shadow-violet-950/20">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 text-white flex items-center justify-center mb-4 shadow-md shadow-violet-600/30">
-                <Sparkles size={20} />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                Gemini AI Engine
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
-                Input any topic or lecture theme. The built-in Google Gemini engine synthesizes timed quiz questions, correct answers, and options in seconds.
-              </p>
+          <div data-ui className="lg:col-span-7 p-6 rounded-2xl bg-[#121720] border border-white/[0.08] space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]"> {/* taste-skill-ignore */}
+              <span className="text-xs font-semibold text-white flex items-center gap-1.5">
+                <Sparkles size={14} className="text-white" />
+                Gemini AI Generator Panel
+              </span>
+              <span className="text-xs text-slate-400">Zero API Cost</span>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-mono text-violet-300">
-              ⚡ Generated 5 Qs on &quot;System Design&quot;
-            </div>
-          </div>
-
-          {/* Bento Tile 3: Anonymous Q&A (Span 4) */}
-          <div className="md:col-span-4 p-7 rounded-3xl bg-[#0D121D] border border-white/10 flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-4">
-                <MessageSquare size={20} />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                Crowdsourced Q&A
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
-                Audience members submit questions anonymously or with their name. Attendees upvote high-priority topics so leaders address what matters.
-              </p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5 flex items-center justify-between text-xs">
-              <span className="text-slate-300 truncate max-w-[180px]">&quot;How does the latency scale?&quot;</span>
-              <span className="font-bold text-cyan-400 font-mono">▲ 48 votes</span>
-            </div>
-          </div>
-
-          {/* Bento Tile 4: Gamified Quizzes (Span 8) */}
-          <div className="md:col-span-8 p-7 rounded-3xl bg-[#0D121D] border border-white/10 flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4">
-                <Award size={20} />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                Gamified Quizzes & Live Podium
-              </h3>
-              <p className="text-sm text-slate-400 max-w-lg mb-6 leading-relaxed">
-                Add timers and correct answers to any poll question. Reveal the animated podium celebration with confetti to crown the top attendee champions.
-              </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={aiTopic}
+                onChange={e => setAiTopic(e.target.value)}
+                placeholder="Topic: System Design, Kubernetes..."
+                className="flex-1 bg-[#0A0D12] border border-white/[0.12] rounded px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-white"
+              />
+              <button
+                type="button"
+                onClick={handleGenerateAiSample}
+                disabled={isGeneratingAi}
+                className="px-4 py-2 text-xs font-semibold text-[#0A0D12] bg-white hover:bg-slate-200 rounded cursor-pointer transition-colors whitespace-nowrap"
+              >
+                {isGeneratingAi ? 'Synthesizing...' : 'Generate Sample'}
+              </button>
             </div>
 
-            {/* Podium Mockup */}
-            <div className="grid grid-cols-3 gap-3 items-end pt-2">
-              <div className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/40 text-center">
-                <span className="text-[10px] font-bold text-slate-400">2ND PLACE</span>
-                <p className="text-xs font-bold text-white truncate mt-0.5">Alex M.</p>
-                <span className="text-xs font-mono font-bold text-slate-400">200 pts</span>
-              </div>
-              <div className="p-4 rounded-xl bg-amber-500/15 border border-amber-500/40 text-center -translate-y-1">
-                <span className="text-[10px] font-black text-amber-400">👑 CHAMPION</span>
-                <p className="text-xs font-bold text-white truncate mt-0.5">Elena K.</p>
-                <span className="text-xs font-mono font-bold text-amber-300">300 pts</span>
-              </div>
-              <div className="p-3 rounded-xl bg-amber-900/20 border border-amber-800/30 text-center">
-                <span className="text-[10px] font-bold text-amber-600">3RD PLACE</span>
-                <p className="text-xs font-bold text-white truncate mt-0.5">Marcus D.</p>
-                <span className="text-xs font-mono font-bold text-amber-500">100 pts</span>
+            {/* Generated Sample Card */}
+            <div className="p-4 rounded-xl bg-[#0A0D12] border border-white/[0.06] space-y-3">
+              <span className="text-[11px] text-slate-500">
+                Synthesized Question (30s Timer):
+              </span>
+              <h4 className="text-xs font-semibold text-white">
+                {aiQuizPreview.question}
+              </h4>
+
+              <div className="space-y-1.5 pt-1">
+                {aiQuizPreview.options.map((opt, oIdx) => (
+                  <div
+                    key={oIdx}
+                    className={`p-2 rounded text-xs flex items-center justify-between ${
+                      opt.correct
+                        ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-medium'
+                        : 'bg-[#121720] text-slate-400'
+                    }`}
+                  >
+                    <span>{opt.text}</span>
+                    {opt.correct && (
+                      <span className="text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-300">
+                        Correct Answer
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Solutions & Use Cases (Interactive Tabs) */}
-      <section id="usecases" className="relative z-10 py-20 px-6 max-w-6xl mx-auto border-t border-white/[0.06]">
-        <div className="text-center mb-12">
-          <span className="text-xs font-bold uppercase tracking-wider text-violet-400 mb-2 block">
-            Proven Across High-Stakes Environments
+      {/* Solutions / Use Cases */}
+      <section id="solutions" className="py-24 px-6 max-w-7xl mx-auto">
+        <div className="mb-12">
+          <span className="text-xs text-slate-400 font-medium block mb-2">
+            Proven Environments
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Tailored for every audience size.
+          <h2 className="text-3xl font-bold text-white tracking-tight">
+            Engineered for every audience size.
           </h2>
         </div>
 
-        {/* Tab Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+        {/* Tab Selection */}
+        <div className="flex flex-wrap gap-2 mb-8">
           {USE_CASES.map((uc, idx) => (
             <button
               key={uc.id}
               onClick={() => setActiveUseCase(idx)}
-              className={`px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+              className={`px-4 py-2 text-xs font-medium rounded transition-colors cursor-pointer ${
                 activeUseCase === idx
-                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/25'
-                  : 'bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.06] border border-white/5'
+                  ? 'bg-white text-[#0A0D12]'
+                  : 'bg-[#121720] text-slate-400 hover:text-white border border-white/[0.06]'
               }`}
             >
               {uc.title}
@@ -537,208 +726,245 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Active Use Case Card */}
-        <div className="p-8 sm:p-12 rounded-3xl bg-[#0D121D] border border-white/10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+        {/* Selected Environment Breakdown */}
+        <div className="p-8 rounded-2xl bg-[#121720] border border-white/[0.08] grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
           <div className="md:col-span-7 space-y-4">
-            <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20">
-              {USE_CASES[activeUseCase].tag}
+            <span className="text-xs text-slate-400">
+              Scope: {USE_CASES[activeUseCase].scope}
             </span>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
-              {USE_CASES[activeUseCase].title}
+            <h3 className="text-2xl font-bold text-white">
+              {USE_CASES[activeUseCase].claim}
             </h3>
-            <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
+            <p className="text-sm text-slate-400 leading-relaxed">
               {USE_CASES[activeUseCase].description}
             </p>
-
-            <blockquote className="p-4 rounded-xl bg-white/[0.02] border-l-2 border-violet-500 text-xs sm:text-sm text-slate-300 italic">
-              &quot;{USE_CASES[activeUseCase].quote}&quot;
-            </blockquote>
           </div>
 
-          <div className="md:col-span-5 space-y-3">
-            {USE_CASES[activeUseCase].metrics.map((metric, mIdx) => (
+          <div className="md:col-span-5 space-y-2.5">
+            {USE_CASES[activeUseCase].specs.map((spec, sIdx) => (
               <div
-                key={mIdx}
-                className="flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06]"
+                key={sIdx}
+                className="p-3 rounded-lg bg-[#0A0D12] border border-white/[0.06] flex items-center gap-3 text-xs text-slate-200"
               >
-                <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
-                <span className="text-xs sm:text-sm font-semibold text-slate-200">{metric}</span>
+                <Check size={14} className="text-emerald-400 shrink-0" />
+                <span>{spec}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Comparison: Why SURV is 100% Free Forever */}
-      <section id="comparison" className="relative z-10 py-20 px-6 max-w-5xl mx-auto border-t border-white/[0.06]">
-        <div className="text-center mb-16">
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2 block">
-            Transparent Pricing
+      {/* Free Guarantee: Transparent Comparison Table */}
+      <section id="guarantee" className="py-24 px-6 max-w-7xl mx-auto">
+        <div className="mb-12">
+          <span className="text-xs text-slate-400 font-medium block mb-2">
+            The Free Platform Guarantee
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
-            Zero Paywalls. No Participant Caps.
+          <h2 className="text-3xl font-bold text-white tracking-tight">
+            Zero paywalls. No participant caps.
           </h2>
-          <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-            Legacy tools charge hundreds per month for basic features. SURV is open architecture and free forever.
+          <p className="text-sm text-slate-400 mt-2 max-w-xl">
+            Commercial tools charge hundreds per host every month for basic features. SURV is built on modern serverless architecture and is free forever.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           {/* SURV Card */}
-          <div className="p-8 rounded-3xl bg-gradient-to-b from-violet-950/30 to-[#0D121D] border-2 border-violet-500/60 shadow-2xl shadow-violet-950/30 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-violet-400">
-                  SURV Platform
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-black text-emerald-300 bg-emerald-500/15 border border-emerald-500/30">
-                  100% FREE
+          <div className="p-8 rounded-2xl bg-[#121720] border-2 border-white flex flex-col justify-between">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-white">SURV Platform</span>
+                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                  100% Free Forever
                 </span>
               </div>
 
-              <div className="mb-6">
-                <span className="text-4xl font-black text-white">$0</span>
-                <span className="text-xs text-slate-400 ml-2">/ month forever</span>
+              <div>
+                <span className="text-4xl font-bold text-white">$0</span>
+                <span className="text-xs text-slate-400 ml-2">/ host / month</span>
               </div>
 
-              <ul className="space-y-3 text-xs sm:text-sm text-slate-200">
-                <li className="flex items-center gap-2.5">
-                  <Check size={16} className="text-emerald-400" />
-                  <strong>Unlimited audience participants</strong>
+              <ul className="space-y-3 text-xs text-slate-200">
+                <li className="flex items-center gap-2">
+                  <Check size={15} className="text-emerald-400 shrink-0" />
+                  <span>Unlimited live participants per session</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <Check size={16} className="text-emerald-400" />
-                  <strong>Google Gemini AI quiz generator included</strong>
+                <li className="flex items-center gap-2">
+                  <Check size={15} className="text-emerald-400 shrink-0" />
+                  <span>Google Gemini AI quiz question generation included</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <Check size={16} className="text-emerald-400" />
-                  <strong>Dynamic word clouds & 5-star ratings</strong>
+                <li className="flex items-center gap-2">
+                  <Check size={15} className="text-emerald-400 shrink-0" />
+                  <span>Dynamic word clouds &amp; 5-star satisfaction visualizers</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <Check size={16} className="text-emerald-400" />
-                  <strong>Audience Q&A upvoting & host moderation</strong>
+                <li className="flex items-center gap-2">
+                  <Check size={15} className="text-emerald-400 shrink-0" />
+                  <span>Live Q&amp;A crowdsourced upvoting &amp; host moderation</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <Check size={16} className="text-emerald-400" />
-                  <strong>1-click session data export (JSON/CSV)</strong>
+                <li className="flex items-center gap-2">
+                  <Check size={15} className="text-emerald-400 shrink-0" />
+                  <span>Raw session data export (JSON &amp; CSV) without fees</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <Check size={16} className="text-emerald-400" />
-                  <strong>Zero app downloads required</strong>
+                <li className="flex items-center gap-2">
+                  <Check size={15} className="text-emerald-400 shrink-0" />
+                  <span>Zero account requirement for participants</span>
                 </li>
               </ul>
             </div>
 
             <button
               onClick={() => router.push('/host')}
-              className="w-full mt-8 py-3.5 px-6 font-semibold text-xs sm:text-sm text-white bg-violet-600 hover:bg-violet-500 rounded-xl shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+              className="mt-8 w-full py-3 text-xs font-semibold text-[#0A0D12] bg-white hover:bg-slate-200 rounded transition-colors cursor-pointer"
             >
-              <span>Create Free Room Now</span>
-              <ArrowRight size={15} />
+              Start Free Session Now
             </button>
           </div>
 
-          {/* Legacy Tools Card */}
-          <div className="p-8 rounded-3xl bg-[#0D121D] border border-white/[0.08] flex flex-col justify-between opacity-80">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          {/* Legacy Commercial Tools Card */}
+          <div className="p-8 rounded-2xl bg-[#121720] border border-white/[0.08] flex flex-col justify-between opacity-80">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-300">
                   Legacy Commercial Tools (Vevox / Slido)
                 </span>
+                <span className="text-xs text-slate-500">Commercial Tier</span>
               </div>
 
-              <div className="mb-6">
-                <span className="text-4xl font-black text-slate-400">$99+</span>
-                <span className="text-xs text-slate-500 ml-2">/ month for enterprise features</span>
+              <div>
+                <span className="text-4xl font-bold text-slate-400">$99+</span>
+                <span className="text-xs text-slate-500 ml-2">/ host / month</span>
               </div>
 
-              <ul className="space-y-3 text-xs sm:text-sm text-slate-400">
-                <li className="flex items-center gap-2.5">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Free tier capped at only 100 participants</span>
+              <ul className="space-y-3 text-xs text-slate-400">
+                <li className="flex items-center gap-2">
+                  <span className="text-rose-400 font-bold">&times;</span>
+                  <span>Free tier restricted to 100 participants</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>AI quiz generation locked behind enterprise tier</span>
+                <li className="flex items-center gap-2">
+                  <span className="text-rose-400 font-bold">&times;</span>
+                  <span>AI question generation locked to enterprise tiers</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Limited polls per event on free accounts</span>
+                <li className="flex items-center gap-2">
+                  <span className="text-rose-400 font-bold">&times;</span>
+                  <span>Poll limits per event on free accounts</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Data export locked behind paid subscriptions</span>
+                <li className="flex items-center gap-2">
+                  <span className="text-rose-400 font-bold">&times;</span>
+                  <span>Data export locked behind paid subscription tiers</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Aggressive upgrade prompts during live sessions</span>
+                <li className="flex items-center gap-2">
+                  <span className="text-rose-400 font-bold">&times;</span>
+                  <span>Upgrade prompts displayed to attendees</span>
                 </li>
               </ul>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-white/[0.06] text-center text-xs text-slate-500">
-              Why pay monthly fees when you can host your own platform for free?
+            <div className="mt-8 pt-4 border-t border-white/[0.06] text-xs text-slate-500 text-center"> {/* taste-skill-ignore */}
+              Self-host or run on generous free-tier cloud infrastructure.
             </div>
           </div>
         </div>
       </section>
 
-      {/* Final Action CTA Banner */}
-      <section className="relative z-10 py-20 px-6 max-w-5xl mx-auto">
-        <div className="p-10 sm:p-14 rounded-3xl bg-gradient-to-tr from-violet-900/40 via-slate-900 to-indigo-950/40 border border-violet-500/30 text-center shadow-2xl relative overflow-hidden">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-            Ready to energize your next session?
-          </h2>
-          <p className="text-sm sm:text-base text-slate-300 max-w-lg mx-auto mb-8">
-            Create an interactive room in under 5 seconds. No account required to test or present.
-          </p>
+      {/* CTA: First Step Already Open (Dealt Blueprint) */}
+      <section className="py-24 px-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-5 space-y-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight">
+              Create your session in five seconds.
+            </h2>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Name your session and launch immediately. No credit card, no sign-up forms, no software installs.
+            </p>
+          </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div data-ui className="lg:col-span-7 p-8 rounded-2xl bg-[#121720] border border-white/[0.08] space-y-5">
+            <span className="text-xs font-semibold text-white block">
+              Session Configuration
+            </span>
+
+            <div className="space-y-2">
+              <label className="text-xs text-slate-400 block font-medium">
+                Session Name
+              </label>
+              <input
+                type="text"
+                value={createTitle}
+                onChange={e => setCreateTitle(e.target.value)}
+                className="w-full bg-[#0A0D12] border border-white/[0.12] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-white transition-colors"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs text-slate-400 block font-medium">
+                Primary Engagement Format
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'polls', label: 'Live Polls' },
+                  { id: 'quiz', label: 'AI Quiz Battle' },
+                  { id: 'qa', label: 'Live Q&A' },
+                ].map(mode => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => setCreateMode(mode.id as any)}
+                    className={`py-2 px-3 rounded text-xs font-medium transition-colors cursor-pointer text-center ${
+                      createMode === mode.id
+                        ? 'bg-white text-[#0A0D12]'
+                        : 'bg-[#0A0D12] text-slate-300 border border-white/[0.08] hover:bg-[#161E2C]'
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
-              onClick={() => router.push('/host')}
-              className="px-6 py-3.5 text-xs sm:text-sm font-semibold text-white bg-violet-600 hover:bg-violet-500 rounded-xl shadow-lg shadow-violet-600/30 flex items-center gap-2 cursor-pointer transition-all"
+              type="button"
+              onClick={handleLaunchSession}
+              className="w-full py-3 text-xs font-semibold text-[#0A0D12] bg-white hover:bg-slate-200 rounded flex items-center justify-center gap-2 cursor-pointer transition-colors"
             >
-              <span>Launch Host Command Center</span>
-              <ArrowRight size={15} />
-            </button>
-            <button
-              onClick={() => router.push('/present/123-456-789')}
-              className="px-6 py-3.5 text-xs sm:text-sm font-semibold text-slate-300 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-xl cursor-pointer transition-all"
-            >
-              View Presenter Projector HUD
+              <span>Launch Session Dashboard</span>
+              <ArrowRight size={14} />
             </button>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/[0.06] bg-[#05070C] py-8 px-6 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-300">SURV Interactive</span>
-            <span>•</span>
-            <span>Next.js 16 • Tailwind CSS v4 • Supabase Realtime • Google Gemini AI</span>
+      {/* Footer: Single Quiet Line (Dealt Blueprint) */}
+      <footer className="py-12 px-6 max-w-7xl mx-auto text-xs text-slate-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-slate-400">
+            <span className="font-semibold text-white">SURV</span>
+            <span>&bull;</span>
+            <span>Live audience engagement platform</span>
           </div>
 
           <div className="flex items-center gap-6">
             <span
-              className="hover:text-slate-300 cursor-pointer"
+              className="hover:text-white cursor-pointer transition-colors"
               onClick={() => router.push('/host')}
             >
-              Host Dashboard
+              Host Command Center
             </span>
             <span
-              className="hover:text-slate-300 cursor-pointer"
+              className="hover:text-white cursor-pointer transition-colors"
               onClick={() => router.push('/present/123-456-789')}
             >
-              Presenter View
+              Stage Projector
             </span>
             <span
-              className="hover:text-slate-300 cursor-pointer"
+              className="hover:text-white cursor-pointer transition-colors"
               onClick={() => router.push('/app/123-456-789')}
             >
               Participant View
             </span>
+          </div>
+
+          <div className="text-slate-500">
+            &copy; 2026 &bull; Free &amp; Open Platform
           </div>
         </div>
       </footer>
