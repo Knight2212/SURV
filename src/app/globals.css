@@ -1,9 +1,21 @@
-@import url('https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Switzer', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Fintech Template Color System */
+  --color-canvas: #E6E5DC;
+  --color-canvas-surface: #DFDDD3;
+  --color-canvas-inset: #EBEAE3;
+  --color-pine: #2D4A3E;
+  --color-pine-dark: #233B31;
+  --color-pine-border: #283E34;
+  --color-ink: #181F1C;
+  --color-ink-muted: #8C9188;
+  --color-ink-body: #5F665E;
+  --color-accent-orange: #EA580C;
 }
 
 * {
@@ -14,9 +26,9 @@ html,
 body {
   max-width: 100vw;
   min-height: 100svh;
-  background-color: #0A0D12;
-  color: #F8FAFC;
-  font-family: 'Switzer', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #283E34;
+  color: #181F1C;
+  font-family: 'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -37,18 +49,18 @@ select {
   font-family: inherit;
 }
 
-/* Custom scrollbar */
+/* Custom refined scrollbar matching the bone ivory canvas */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0A0D12;
+  background: #E6E5DC;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: #C4C2B8;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: #A8A69C;
 }
