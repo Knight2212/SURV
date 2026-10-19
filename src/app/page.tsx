@@ -12,41 +12,78 @@ import {
   BarChart3,
   MessageSquare,
   Award,
-  ClipboardCheck,
-  Play,
+  Smartphone,
   CheckCircle2,
-  Zap,
+  Lock,
+  Flame,
   Globe,
   ShieldCheck,
-  Smartphone,
-  Cpu,
-  Layers,
-  Star,
   Check,
   ChevronRight,
+  TrendingUp,
+  Clock,
+  Layers,
+  Star,
 } from 'lucide-react';
 import { initializeStore } from '@/lib/store';
 
 // Interactive Mock Demo Card data
-const DEMO_OPTIONS = [
-  { id: 'opt-1', text: 'Live Audience Polling & Bar Charts', votes: 142, color: '#6366F1' },
-  { id: 'opt-2', text: 'Anonymous Moderated Q&A with Upvoting', votes: 98, color: '#06B6D4' },
-  { id: 'opt-3', text: 'Dynamic Real-time Word Clouds', votes: 76, color: '#10B981' },
-  { id: 'opt-4', text: 'AI-Generated Quizzes & Gamification', votes: 124, color: '#F59E0B' },
+const DEMO_POLL_OPTIONS = [
+  { id: 'opt-a', label: 'A', text: 'Cloud-Native Microservices', votes: 142, color: '#7C3AED' },
+  { id: 'opt-b', label: 'B', text: 'Event-Driven Architecture', votes: 118, color: '#06B6D4' },
+  { id: 'opt-c', label: 'C', text: 'Serverless Edge Functions', votes: 84, color: '#10B981' },
+  { id: 'opt-d', label: 'D', text: 'Modular Monolith with Turbopack', votes: 62, color: '#F59E0B' },
+];
+
+const USE_CASES = [
+  {
+    id: 'education',
+    title: 'Higher Education & Lectures',
+    tag: 'Active Learning',
+    description: 'Transform 300-seat lecture halls into interactive learning spaces. Gauge comprehension instantly without student hesitation.',
+    metrics: ['94% student participation', '100% anonymous voting', 'Zero app downloads'],
+    quote: 'Students who never raised their hands now lead the discussion through anonymous polls.',
+  },
+  {
+    id: 'corporate',
+    title: 'All-Hands & Town Halls',
+    tag: 'Executive Alignment',
+    description: 'Empower employees to ask difficult, candid questions with crowdsourced upvoting. Leaders address top concerns transparently.',
+    metrics: ['Real-time question upvoting', 'Presenter screen moderation', 'Instant feedback polls'],
+    quote: 'Our executive Q&A sessions became 10x more transparent and impactful in one week.',
+  },
+  {
+    id: 'workshops',
+    title: 'Training & Design Sprints',
+    tag: 'Continuous Engagement',
+    description: 'Break the monotony of long presentations with word clouds, instant knowledge checks, and timed quiz battles with leaderboards.',
+    metrics: ['Gemini AI question generation', 'Dynamic word cloud cluster', 'Podium celebrations'],
+    quote: 'The AI quiz generator crafted our entire post-training assessment in 5 seconds flat.',
+  },
+  {
+    id: 'conferences',
+    title: 'Hybrid & Global Conferences',
+    tag: 'Massive Scale',
+    description: 'Connect in-person audience members and virtual attendees on a single synchronized stage with sub-second WebSocket latency.',
+    metrics: ['Instant QR code joining', 'Universal device support', 'Unlimited participants'],
+    quote: 'Seamless connection across both in-room projector screens and remote laptop viewers.',
+  },
 ];
 
 export default function HomePage() {
   const router = useRouter();
   const [pinInput, setPinInput] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [demoSelected, setDemoSelected] = useState<string | null>('opt-1');
-  const [demoVotes, setDemoVotes] = useState(DEMO_OPTIONS);
+  const [activeUseCase, setActiveUseCase] = useState(0);
+
+  // Interactive Live Hero Simulator State
+  const [selectedHeroVote, setSelectedHeroVote] = useState<string>('opt-a');
+  const [heroVotes, setHeroVotes] = useState(DEMO_POLL_OPTIONS);
 
   useEffect(() => {
     initializeStore();
   }, []);
 
-  // Format 9-digit PIN nicely with dashes as user types (e.g. 123-456-789)
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/[^0-9]/g, '').slice(0, 9);
     let formatted = raw;
@@ -63,501 +100,646 @@ export default function HomePage() {
     e.preventDefault();
     const clean = pinInput.replace(/[^0-9]/g, '');
     if (clean.length < 6) {
-      setErrorMsg('Please enter a valid 9-digit session PIN (e.g. 123-456-789)');
+      setErrorMsg('Please enter a valid 9-digit session PIN');
       return;
     }
     router.push(`/app/${pinInput}`);
   };
 
-  const handleLaunchDemo = (type: 'participant' | 'presenter' | 'host') => {
-    const demoPin = '123-456-789';
-    if (type === 'participant') {
-      router.push(`/app/${demoPin}`);
-    } else if (type === 'presenter') {
-      router.push(`/present/${demoPin}`);
-    } else {
-      router.push(`/host/${demoPin}`);
-    }
-  };
-
-  const handleDemoVote = (optId: string) => {
-    if (demoSelected === optId) return;
-    setDemoSelected(optId);
-    setDemoVotes(prev =>
+  const handleHeroVote = (optId: string) => {
+    if (selectedHeroVote === optId) return;
+    setSelectedHeroVote(optId);
+    setHeroVotes(prev =>
       prev.map(opt => (opt.id === optId ? { ...opt, votes: opt.votes + 1 } : opt))
     );
   };
 
-  const totalDemoVotes = demoVotes.reduce((acc, curr) => acc + curr.votes, 0);
+  const totalHeroVotes = heroVotes.reduce((acc, curr) => acc + curr.votes, 0);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090E] text-slate-100 overflow-x-hidden selection:bg-indigo-500/30 selection:text-indigo-200">
-      {/* Background Ambient Glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[550px] bg-gradient-to-b from-indigo-600/15 via-violet-600/10 to-transparent blur-[140px] rounded-full" />
-        <div className="absolute top-1/3 -left-40 w-[600px] h-[500px] bg-cyan-500/8 blur-[160px] rounded-full" />
-        <div className="absolute bottom-20 -right-40 w-[600px] h-[500px] bg-emerald-500/8 blur-[160px] rounded-full" />
-      </div>
+    <div className="min-h-screen bg-[#070A10] text-[#F8FAFC] selection:bg-violet-600/30 selection:text-violet-200">
+      {/* Refined subtle background grid pattern */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] z-0" />
 
-      {/* Navbar */}
-      <header className="sticky top-0 z-50 flex items-center justify-between px-6 sm:px-10 py-4.5 border-b border-white/10 bg-[#07090E]/80 backdrop-blur-xl transition-all">
-        <div
-          className="flex items-center gap-3 cursor-pointer group"
-          onClick={() => router.push('/')}
-        >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:scale-105 transition-transform">
-            <Radio size={20} className="text-white" />
+      {/* Ambient center spotlight */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] bg-gradient-to-b from-violet-600/10 via-indigo-600/5 to-transparent blur-[140px] pointer-events-none z-0" />
+
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#070A10]/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <div
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => router.push('/')}
+          >
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-600/20 group-hover:scale-105 transition-transform">
+              <Radio size={16} className="text-white" />
+            </div>
+            <span className="text-lg font-black tracking-tight text-white">
+              SURV<span className="text-violet-400">.</span>
+            </span>
           </div>
-          <span className="text-xl font-extrabold tracking-tight text-white">
-            SURV<span className="text-cyan-400">.</span>
-          </span>
-          <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 hidden sm:inline-block">
-            Realtime Engagement
-          </span>
-        </div>
 
-        <div className="flex items-center gap-3 sm:gap-4">
-          <button
-            onClick={() => router.push('/host')}
-            className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all cursor-pointer"
-          >
-            Host Dashboard
-          </button>
-          <button
-            onClick={() => handleLaunchDemo('presenter')}
-            className="px-4.5 py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 rounded-xl shadow-lg shadow-indigo-600/25 flex items-center gap-2 transition-all cursor-pointer"
-          >
-            <Monitor size={15} />
-            <span>Presenter Screen</span>
-          </button>
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-400">
+            <a href="#demo" className="hover:text-white transition-colors">
+              Live Showcase
+            </a>
+            <a href="#features" className="hover:text-white transition-colors">
+              Platform Features
+            </a>
+            <a href="#usecases" className="hover:text-white transition-colors">
+              Solutions
+            </a>
+            <a href="#comparison" className="hover:text-white transition-colors">
+              Why Free?
+            </a>
+          </nav>
+
+          {/* Action CTAs */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/host')}
+              className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-lg hover:bg-white/[0.06] transition-all cursor-pointer"
+            >
+              Host Dashboard
+            </button>
+            <button
+              onClick={() => router.push('/present/123-456-789')}
+              className="px-4 py-2 text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 rounded-lg shadow-md shadow-violet-600/25 flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Monitor size={14} />
+              <span>Presenter Screen</span>
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="relative z-10 flex-1 flex flex-col items-center px-4 sm:px-6 pt-16 sm:pt-24 pb-20 max-w-6xl mx-auto w-full">
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-medium mb-8 backdrop-blur-md shadow-sm"
-        >
-          <Sparkles size={15} className="text-indigo-400 animate-pulse" />
+      <section className="relative z-10 pt-20 pb-16 px-6 max-w-5xl mx-auto text-center">
+        {/* Announcement Pill */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold mb-6 shadow-sm">
+          <Sparkles size={13} className="text-violet-400" />
           <span>Next-Generation Audience Response Platform</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping ml-1" />
-        </motion.div>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+        </div>
 
-        {/* Hero Headline */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-4xl sm:text-6xl md:text-7xl font-black text-center tracking-tight leading-[1.08] max-w-4xl mb-6"
-        >
-          Transform any meeting or lecture into a{' '}
-          <span className="bg-gradient-to-r from-white via-indigo-200 to-cyan-300 bg-clip-text text-transparent">
-            live conversation.
+        {/* Headline */}
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.08] text-white mb-6">
+          Transform presentations into{' '}
+          <span className="bg-gradient-to-r from-violet-400 via-indigo-300 to-emerald-300 bg-clip-text text-transparent">
+            live conversations.
           </span>
-        </motion.h1>
+        </h1>
 
         {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-base sm:text-xl text-slate-400 text-center max-w-2xl leading-relaxed mb-10"
-        >
-          Interactive live polling, real-time word clouds, anonymous Q&A with upvoting, and gamified quizzes with instant leaderboards. Zero app downloads.
-        </motion.p>
+        <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-10">
+          The modern, 100% free alternative to Vevox and Slido. Real-time polling, animated word clouds, anonymous Q&A, and gamified quizzes with zero app downloads.
+        </p>
 
-        {/* PIN Join Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="w-full max-w-md p-6 sm:p-8 rounded-2xl bg-slate-900/70 border border-white/10 backdrop-blur-2xl shadow-2xl shadow-indigo-950/40 mb-14"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Enter 9-Digit Session PIN
-            </span>
-            <span className="text-xs text-indigo-400 font-medium flex items-center gap-1">
-              <Zap size={13} /> Instant Join
-            </span>
-          </div>
-
-          <form onSubmit={handleJoin} className="flex flex-col gap-3.5">
-            <input
-              type="text"
-              inputMode="numeric"
-              value={pinInput}
-              onChange={handlePinChange}
-              placeholder="123-456-789"
-              className="w-full text-center tracking-widest font-mono text-2xl font-bold py-3.5 bg-slate-950/80 border border-white/15 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
-              autoFocus
-            />
-
-            {errorMsg && (
-              <span className="text-xs text-rose-400 text-center bg-rose-500/10 border border-rose-500/20 py-2 rounded-lg">
-                {errorMsg}
+        {/* Single Unified Action Hub */}
+        <div className="max-w-xl mx-auto p-2 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl shadow-2xl shadow-black/50 mb-6">
+          <form onSubmit={handleJoin} className="flex flex-col sm:flex-row items-center gap-2">
+            <div className="flex-1 w-full flex items-center px-4 py-2.5 bg-slate-950/70 border border-white/10 rounded-xl focus-within:border-violet-500/60 transition-colors">
+              <span className="text-xs font-bold font-mono text-slate-500 mr-2 tracking-wider">
+                PIN:
               </span>
-            )}
+              <input
+                type="text"
+                inputMode="numeric"
+                value={pinInput}
+                onChange={handlePinChange}
+                placeholder="123-456-789"
+                className="w-full bg-transparent text-sm sm:text-base font-mono font-bold text-white placeholder-slate-600 focus:outline-none tracking-widest"
+              />
+            </div>
 
             <button
               type="submit"
-              className="w-full py-3.5 px-6 font-semibold text-white bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer group"
+              className="w-full sm:w-auto px-6 py-3 font-semibold text-xs sm:text-sm text-white bg-violet-600 hover:bg-violet-500 rounded-xl shadow-lg shadow-violet-600/30 flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap"
             >
               <span>Join Session</span>
-              <ArrowRight size={17} className="group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight size={15} />
             </button>
           </form>
 
-          {/* Quick Demo Launch Link */}
-          <div className="mt-5 pt-4 border-t border-white/10 text-center">
-            <button
-              onClick={() => handleLaunchDemo('participant')}
-              className="text-xs text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Play size={13} fill="currentColor" /> Or jump straight into the Demo Session (123-456-789)
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Live Interactive Widget Demo on Landing Page */}
-        <div className="w-full max-w-3xl mb-24">
-          <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-indigo-500/20 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-            <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
-              <div className="flex items-center gap-2.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                  Interactive Live Poll Preview
-                </span>
-              </div>
-              <span className="text-xs text-slate-400 font-mono">
-                {totalDemoVotes} total live votes
-              </span>
-            </div>
-
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-5 leading-snug">
-              What feature matters most for your live audience sessions?
-            </h3>
-
-            <div className="space-y-3">
-              {demoVotes.map((opt, idx) => {
-                const percentage = Math.round((opt.votes / totalDemoVotes) * 100);
-                const isSelected = demoSelected === opt.id;
-
-                return (
-                  <div
-                    key={opt.id}
-                    onClick={() => handleDemoVote(opt.id)}
-                    className={`relative p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer select-none overflow-hidden ${
-                      isSelected
-                        ? 'border-indigo-500 bg-indigo-950/20 shadow-md shadow-indigo-500/10'
-                        : 'border-white/10 bg-white/3 hover:bg-white/6 hover:border-white/20'
-                    }`}
-                  >
-                    {/* Fill Bar */}
-                    <div
-                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500/15 to-indigo-500/25 transition-all duration-700 ease-out z-0"
-                      style={{ width: `${percentage}%` }}
-                    />
-
-                    {/* Content */}
-                    <div className="relative z-10 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${
-                            isSelected
-                              ? 'bg-indigo-600 text-white'
-                              : 'bg-white/10 text-slate-300'
-                          }`}
-                        >
-                          {String.fromCharCode(65 + idx)}
-                        </div>
-                        <span className="text-sm font-semibold text-slate-200">
-                          {opt.text}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-xs text-slate-400 font-mono">
-                          {opt.votes} votes
-                        </span>
-                        <span className="text-sm font-bold text-indigo-300 font-mono w-10 text-right">
-                          {percentage}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <p className="text-xs text-slate-500 text-center mt-4">
-              Click any option above to cast a live vote and watch the visualizer update in real-time.
+          {errorMsg && (
+            <p className="text-xs text-rose-400 text-center mt-2 font-medium">
+              {errorMsg}
             </p>
-          </div>
+          )}
         </div>
 
-        {/* 3 Core Experience Views (Bento Showcase) */}
-        <div className="w-full mb-28">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
-              Explore the 3 Core SURV Experiences
-            </h2>
-            <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
-              Purpose-built interfaces tailored specifically for attendees, stage presenters, and session hosts.
-            </p>
-          </div>
+        {/* Quick Launch Demo */}
+        <div className="flex items-center justify-center gap-6 text-xs text-slate-400">
+          <span>Or explore ready-to-test sessions:</span>
+          <button
+            onClick={() => router.push('/app/123-456-789')}
+            className="text-violet-400 hover:text-violet-300 font-semibold flex items-center gap-1 cursor-pointer"
+          >
+            <Smartphone size={13} /> Participant App
+          </button>
+          <span className="text-slate-600">•</span>
+          <button
+            onClick={() => router.push('/present/123-456-789')}
+            className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 cursor-pointer"
+          >
+            <Monitor size={13} /> Presenter Projector
+          </button>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* 1: Participant App */}
-            <div
-              onClick={() => handleLaunchDemo('participant')}
-              className="p-6 rounded-2xl bg-slate-900/50 border border-white/10 hover:border-indigo-500/50 hover:bg-slate-900/80 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
-                  <Smartphone size={24} />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Participant App</h3>
-                <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                  Mobile-first zero-install audience interface. Vote in live polls, submit Q&A questions anonymously, and earn quiz badges.
-                </p>
-              </div>
-              <span className="text-xs font-semibold text-indigo-400 flex items-center gap-1.5 group-hover:text-indigo-300 pt-4 border-t border-white/5">
-                <span>Launch Participant Web App</span>
-                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+      {/* Interactive Live Product Arena (Dual-Screen Simulation) */}
+      <section id="demo" className="relative z-10 py-12 px-6 max-w-6xl mx-auto">
+        <div className="rounded-3xl bg-[#0D121D] border border-white/10 shadow-2xl overflow-hidden">
+          {/* Mock Window Top Bar */}
+          <div className="px-5 py-3.5 bg-slate-900/90 border-b border-white/[0.08] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-rose-500/80" />
+              <span className="w-3 h-3 rounded-full bg-amber-500/80" />
+              <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
+              <span className="text-xs font-mono text-slate-400 ml-2 hidden sm:inline">
+                SURV Live Stage Simulator • PIN 123-456-789
               </span>
             </div>
 
-            {/* 2: Presenter Projector Screen */}
-            <div
-              onClick={() => handleLaunchDemo('presenter')}
-              className="p-6 rounded-2xl bg-slate-900/50 border border-cyan-500/30 hover:border-cyan-400 hover:bg-slate-900/80 transition-all cursor-pointer group flex flex-col justify-between shadow-lg shadow-cyan-950/20"
-            >
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                <span>Synchronized Real-Time</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Interactive Split Arena */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-white/[0.08]">
+            {/* Left: Stage Projector Screen (7 Cols) */}
+            <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
-                  <Monitor size={24} />
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-lg font-bold text-white">Presenter Screen</h3>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                    Stage HUD
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-violet-400 flex items-center gap-1.5">
+                    <Monitor size={13} /> Stage Projection View
+                  </span>
+                  <span className="text-xs font-mono text-slate-400">
+                    {totalHeroVotes} Live Responses
                   </span>
                 </div>
-                <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                  Cinematic fullscreen projection view. Auto-generating QR join code, dynamic animated word clouds, live bar graphs, and podium celebrations.
-                </p>
+
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-6 leading-snug">
+                  Which tech architecture should our engineering team adopt for Q4?
+                </h3>
+
+                {/* Animated Bars */}
+                <div className="space-y-3.5">
+                  {heroVotes.map(opt => {
+                    const percentage = Math.round((opt.votes / totalHeroVotes) * 100);
+                    const isLeading = opt.id === 'opt-a';
+
+                    return (
+                      <div key={opt.id} className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs font-semibold">
+                          <span className="text-slate-300 flex items-center gap-2">
+                            <span className="w-5 h-5 rounded bg-white/10 flex items-center justify-center font-bold text-[10px] text-white">
+                              {opt.label}
+                            </span>
+                            {opt.text}
+                            {isLeading && (
+                              <span className="text-[10px] text-violet-400 font-bold bg-violet-500/10 px-1.5 py-0.5 rounded border border-violet-500/20">
+                                Leading
+                              </span>
+                            )}
+                          </span>
+                          <span className="font-mono text-slate-400">
+                            <strong className="text-white font-bold">{percentage}%</strong> ({opt.votes})
+                          </span>
+                        </div>
+
+                        {/* Progress track */}
+                        <div className="h-3 w-full rounded-full bg-white/5 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-500 transition-all duration-500 ease-out"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <span className="text-xs font-semibold text-cyan-400 flex items-center gap-1.5 group-hover:text-cyan-300 pt-4 border-t border-white/5">
-                <span>Open Projector Display</span>
-                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </span>
+
+              <div className="mt-8 pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs text-slate-500">
+                <span>Presenter Mode with auto-hiding controls</span>
+                <span className="font-mono text-slate-400">Press Space for Next Poll</span>
+              </div>
             </div>
 
-            {/* 3: Host Command Center */}
-            <div
-              onClick={() => handleLaunchDemo('host')}
-              className="p-6 rounded-2xl bg-slate-900/50 border border-white/10 hover:border-emerald-500/50 hover:bg-slate-900/80 transition-all cursor-pointer group flex flex-col justify-between"
-            >
+            {/* Right: Participant Interactive Phone Preview (5 Cols) */}
+            <div className="lg:col-span-5 p-6 sm:p-8 bg-slate-950/40 flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
-                  <BarChart3 size={24} />
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                    <Smartphone size={13} /> Participant Phone (Interactive)
+                  </span>
+                  <span className="text-xs text-slate-400">Click to cast vote</span>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Host Command Center</h3>
-                <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                  Complete session control. Trigger polls, toggle voting locks, moderate audience questions, craft quizzes with Gemini AI, and export analytics.
-                </p>
+
+                <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-2.5">
+                  <p className="text-xs font-semibold text-slate-400 mb-3">
+                    Tap an option below to simulate live participant voting:
+                  </p>
+
+                  {heroVotes.map(opt => {
+                    const isSelected = selectedHeroVote === opt.id;
+
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => handleHeroVote(opt.id)}
+                        className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-violet-600/20 border-violet-500 text-white shadow-sm'
+                            : 'bg-white/[0.02] border-white/[0.08] text-slate-300 hover:bg-white/[0.05]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-[11px] ${
+                              isSelected ? 'bg-violet-600 text-white' : 'bg-white/10 text-slate-400'
+                            }`}
+                          >
+                            {opt.label}
+                          </span>
+                          <span>{opt.text}</span>
+                        </div>
+
+                        {isSelected && (
+                          <CheckCircle2 size={16} className="text-violet-400 shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 group-hover:text-emerald-300 pt-4 border-t border-white/5">
-                <span>Open Host Dashboard</span>
-                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </span>
+
+              <p className="text-xs text-slate-500 mt-6 text-center">
+                Audience members scan the QR code and vote with zero install required.
+              </p>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Real-World Use Cases */}
-        <div className="w-full mb-28">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
-              Engineered for High-Stakes Engagement
-            </h2>
-            <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
-              Trusted by universities, enterprises, and conference organizers worldwide.
-            </p>
+      {/* Neo-Minimalist Bento Grid Features */}
+      <section id="features" className="relative z-10 py-20 px-6 max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <span className="text-xs font-bold uppercase tracking-wider text-violet-400 mb-2 block">
+            Comprehensive Audience Tooling
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Everything modern presenters need.
+          </h2>
+        </div>
+
+        {/* Real Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+          {/* Bento Tile 1: Live Visualizers (Span 8) */}
+          <div className="md:col-span-8 p-7 rounded-3xl bg-[#0D121D] border border-white/10 flex flex-col justify-between">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center mb-4">
+                <BarChart3 size={20} />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">
+                Real-Time Dynamic Visualizers
+              </h3>
+              <p className="text-sm text-slate-400 max-w-lg mb-6 leading-relaxed">
+                Choose between animated bar graphs with correct-answer reveals, dynamic word clouds with fluid text scaling, or 5-star rating breakdowns.
+              </p>
+            </div>
+
+            {/* Visualizer Mini Mock */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-white/[0.06]">
+              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
+                <span className="text-xs font-bold text-slate-300 block mb-1">Bar Charts</span>
+                <span className="text-[11px] text-slate-500">Live spring-eased progress percentages</span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
+                <span className="text-xs font-bold text-slate-300 block mb-1">Word Clouds</span>
+                <span className="text-[11px] text-slate-500">Auto-clustered multi-color phrase tags</span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
+                <span className="text-xs font-bold text-slate-300 block mb-1">5-Star Ratings</span>
+                <span className="text-[11px] text-slate-500">Satisfaction scorecards & distributions</span>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="p-5 rounded-2xl bg-slate-900/40 border border-white/5 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center">
-                <Globe size={20} />
+          {/* Bento Tile 2: Gemini AI Engine (Span 4) */}
+          <div className="md:col-span-4 p-7 rounded-3xl bg-[#0D121D] border border-violet-500/30 flex flex-col justify-between relative overflow-hidden shadow-lg shadow-violet-950/20">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 text-white flex items-center justify-center mb-4 shadow-md shadow-violet-600/30">
+                <Sparkles size={20} />
               </div>
-              <h4 className="font-bold text-white text-base">Higher Education</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Check conceptual comprehension in 300+ student lecture halls. Students participate anonymously without hesitation.
+              <h3 className="text-xl font-bold text-white mb-2">
+                Gemini AI Engine
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
+                Input any topic or lecture theme. The built-in Google Gemini engine synthesizes timed quiz questions, correct answers, and options in seconds.
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-900/40 border border-white/5 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-                <Users size={20} />
+            <div className="p-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-mono text-violet-300">
+              ⚡ Generated 5 Qs on &quot;System Design&quot;
+            </div>
+          </div>
+
+          {/* Bento Tile 3: Anonymous Q&A (Span 4) */}
+          <div className="md:col-span-4 p-7 rounded-3xl bg-[#0D121D] border border-white/10 flex flex-col justify-between">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-4">
+                <MessageSquare size={20} />
               </div>
-              <h4 className="font-bold text-white text-base">Town Halls & All-Hands</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Crowdsource high-priority employee questions with real-time upvoting. Leadership addresses what truly matters.
+              <h3 className="text-xl font-bold text-white mb-2">
+                Crowdsourced Q&A
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
+                Audience members submit questions anonymously or with their name. Attendees upvote high-priority topics so leaders address what matters.
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-900/40 border border-white/5 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+            <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5 flex items-center justify-between text-xs">
+              <span className="text-slate-300 truncate max-w-[180px]">&quot;How does the latency scale?&quot;</span>
+              <span className="font-bold text-cyan-400 font-mono">▲ 48 votes</span>
+            </div>
+          </div>
+
+          {/* Bento Tile 4: Gamified Quizzes (Span 8) */}
+          <div className="md:col-span-8 p-7 rounded-3xl bg-[#0D121D] border border-white/10 flex flex-col justify-between">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4">
                 <Award size={20} />
               </div>
-              <h4 className="font-bold text-white text-base">Interactive Training</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Gamify product training and certifications with timed question challenges, correct answers, and podium celebrations.
+              <h3 className="text-xl font-bold text-white mb-2">
+                Gamified Quizzes & Live Podium
+              </h3>
+              <p className="text-sm text-slate-400 max-w-lg mb-6 leading-relaxed">
+                Add timers and correct answers to any poll question. Reveal the animated podium celebration with confetti to crown the top attendee champions.
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-900/40 border border-white/5 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                <ShieldCheck size={20} />
+            {/* Podium Mockup */}
+            <div className="grid grid-cols-3 gap-3 items-end pt-2">
+              <div className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/40 text-center">
+                <span className="text-[10px] font-bold text-slate-400">2ND PLACE</span>
+                <p className="text-xs font-bold text-white truncate mt-0.5">Alex M.</p>
+                <span className="text-xs font-mono font-bold text-slate-400">200 pts</span>
               </div>
-              <h4 className="font-bold text-white text-base">Hybrid Conferences</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Connect in-person and remote participants seamlessly with sub-second WebSocket sync and QR join codes.
-              </p>
+              <div className="p-4 rounded-xl bg-amber-500/15 border border-amber-500/40 text-center -translate-y-1">
+                <span className="text-[10px] font-black text-amber-400">👑 CHAMPION</span>
+                <p className="text-xs font-bold text-white truncate mt-0.5">Elena K.</p>
+                <span className="text-xs font-mono font-bold text-amber-300">300 pts</span>
+              </div>
+              <div className="p-3 rounded-xl bg-amber-900/20 border border-amber-800/30 text-center">
+                <span className="text-[10px] font-bold text-amber-600">3RD PLACE</span>
+                <p className="text-xs font-bold text-white truncate mt-0.5">Marcus D.</p>
+                <span className="text-xs font-mono font-bold text-amber-500">100 pts</span>
+              </div>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Transparent Feature & Tier Matrix */}
-        <div className="w-full mb-24">
-          <div className="text-center mb-10">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-2 block">
-              100% Free & Open Architecture
+      {/* Solutions & Use Cases (Interactive Tabs) */}
+      <section id="usecases" className="relative z-10 py-20 px-6 max-w-6xl mx-auto border-t border-white/[0.06]">
+        <div className="text-center mb-12">
+          <span className="text-xs font-bold uppercase tracking-wider text-violet-400 mb-2 block">
+            Proven Across High-Stakes Environments
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Tailored for every audience size.
+          </h2>
+        </div>
+
+        {/* Tab Buttons */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+          {USE_CASES.map((uc, idx) => (
+            <button
+              key={uc.id}
+              onClick={() => setActiveUseCase(idx)}
+              className={`px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                activeUseCase === idx
+                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/25'
+                  : 'bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.06] border border-white/5'
+              }`}
+            >
+              {uc.title}
+            </button>
+          ))}
+        </div>
+
+        {/* Active Use Case Card */}
+        <div className="p-8 sm:p-12 rounded-3xl bg-[#0D121D] border border-white/10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          <div className="md:col-span-7 space-y-4">
+            <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20">
+              {USE_CASES[activeUseCase].tag}
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
-              No Paywalls. No Participant Caps.
-            </h2>
-            <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
-              Compare SURV with legacy alternatives that charge thousands for enterprise polling.
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
+              {USE_CASES[activeUseCase].title}
+            </h3>
+            <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
+              {USE_CASES[activeUseCase].description}
             </p>
+
+            <blockquote className="p-4 rounded-xl bg-white/[0.02] border-l-2 border-violet-500 text-xs sm:text-sm text-slate-300 italic">
+              &quot;{USE_CASES[activeUseCase].quote}&quot;
+            </blockquote>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-slate-900/40">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-white/10 bg-slate-900/80">
-                  <th className="p-4 sm:p-5 font-semibold text-slate-300">Platform Capability</th>
-                  <th className="p-4 sm:p-5 font-bold text-cyan-400 bg-indigo-950/30">
-                    SURV (This Platform)
-                  </th>
-                  <th className="p-4 sm:p-5 font-semibold text-slate-400">Vevox Free Tier</th>
-                  <th className="p-4 sm:p-5 font-semibold text-slate-400">Slido Free Tier</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                <tr>
-                  <td className="p-4 sm:p-5 font-medium text-white">Participant Limit</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-indigo-950/20">
-                    Unlimited
-                  </td>
-                  <td className="p-4 sm:p-5 text-slate-400">100 participants</td>
-                  <td className="p-4 sm:p-5 text-slate-400">100 participants</td>
-                </tr>
-                <tr>
-                  <td className="p-4 sm:p-5 font-medium text-white">Gemini AI Quiz Generation</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-indigo-950/20">
-                    Included (Free)
-                  </td>
-                  <td className="p-4 sm:p-5 text-slate-500">Not Available</td>
-                  <td className="p-4 sm:p-5 text-slate-500">Enterprise Paid Only</td>
-                </tr>
-                <tr>
-                  <td className="p-4 sm:p-5 font-medium text-white">Live Word Clouds & Ratings</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-indigo-950/20">
-                    Included (Real-time)
-                  </td>
-                  <td className="p-4 sm:p-5 text-slate-400">Limited</td>
-                  <td className="p-4 sm:p-5 text-slate-400">3 polls per event</td>
-                </tr>
-                <tr>
-                  <td className="p-4 sm:p-5 font-medium text-white">Audience Q&A Moderation & Upvoting</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-indigo-950/20">
-                    Full Moderation Suite
-                  </td>
-                  <td className="p-4 sm:p-5 text-slate-400">Basic</td>
-                  <td className="p-4 sm:p-5 text-slate-400">Basic</td>
-                </tr>
-                <tr>
-                  <td className="p-4 sm:p-5 font-medium text-white">Data Export (JSON / Analytics)</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-indigo-950/20">
-                    Instant 1-Click Export
-                  </td>
-                  <td className="p-4 sm:p-5 text-slate-500">Paid Plan Only</td>
-                  <td className="p-4 sm:p-5 text-slate-500">Paid Plan Only</td>
-                </tr>
-                <tr>
-                  <td className="p-4 sm:p-5 font-medium text-white">Cost to Host & Run</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-indigo-950/20">
-                    $0.00 / month (100% Free)
-                  </td>
-                  <td className="p-4 sm:p-5 text-slate-400">$10 – $99+/mo for Pro</td>
-                  <td className="p-4 sm:p-5 text-slate-400">$12 – $150+/mo for Pro</td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="md:col-span-5 space-y-3">
+            {USE_CASES[activeUseCase].metrics.map((metric, mIdx) => (
+              <div
+                key={mIdx}
+                className="flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06]"
+              >
+                <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
+                <span className="text-xs sm:text-sm font-semibold text-slate-200">{metric}</span>
+              </div>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* Bottom CTA Banner */}
-        <div className="w-full p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-indigo-900/50 via-slate-900 to-violet-900/50 border border-indigo-500/30 text-center relative overflow-hidden shadow-2xl">
-          <div className="relative z-10 max-w-2xl mx-auto space-y-5">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
-              Ready to energize your next session?
-            </h2>
-            <p className="text-slate-300 text-sm sm:text-base">
-              Create a free room in 5 seconds. No account required to test or present.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-              <button
-                onClick={() => router.push('/host')}
-                className="px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-2 cursor-pointer transition-all"
-              >
-                <span>Launch Host Dashboard</span>
-                <ArrowRight size={16} />
-              </button>
-              <button
-                onClick={() => handleLaunchDemo('presenter')}
-                className="px-6 py-3.5 text-sm font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl cursor-pointer transition-all"
-              >
-                View Presenter HUD
-              </button>
+      {/* Comparison: Why SURV is 100% Free Forever */}
+      <section id="comparison" className="relative z-10 py-20 px-6 max-w-5xl mx-auto border-t border-white/[0.06]">
+        <div className="text-center mb-16">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2 block">
+            Transparent Pricing
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
+            Zero Paywalls. No Participant Caps.
+          </h2>
+          <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
+            Legacy tools charge hundreds per month for basic features. SURV is open architecture and free forever.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          {/* SURV Card */}
+          <div className="p-8 rounded-3xl bg-gradient-to-b from-violet-950/30 to-[#0D121D] border-2 border-violet-500/60 shadow-2xl shadow-violet-950/30 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-violet-400">
+                  SURV Platform
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-black text-emerald-300 bg-emerald-500/15 border border-emerald-500/30">
+                  100% FREE
+                </span>
+              </div>
+
+              <div className="mb-6">
+                <span className="text-4xl font-black text-white">$0</span>
+                <span className="text-xs text-slate-400 ml-2">/ month forever</span>
+              </div>
+
+              <ul className="space-y-3 text-xs sm:text-sm text-slate-200">
+                <li className="flex items-center gap-2.5">
+                  <Check size={16} className="text-emerald-400" />
+                  <strong>Unlimited audience participants</strong>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Check size={16} className="text-emerald-400" />
+                  <strong>Google Gemini AI quiz generator included</strong>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Check size={16} className="text-emerald-400" />
+                  <strong>Dynamic word clouds & 5-star ratings</strong>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Check size={16} className="text-emerald-400" />
+                  <strong>Audience Q&A upvoting & host moderation</strong>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Check size={16} className="text-emerald-400" />
+                  <strong>1-click session data export (JSON/CSV)</strong>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Check size={16} className="text-emerald-400" />
+                  <strong>Zero app downloads required</strong>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              onClick={() => router.push('/host')}
+              className="w-full mt-8 py-3.5 px-6 font-semibold text-xs sm:text-sm text-white bg-violet-600 hover:bg-violet-500 rounded-xl shadow-lg shadow-violet-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+            >
+              <span>Create Free Room Now</span>
+              <ArrowRight size={15} />
+            </button>
+          </div>
+
+          {/* Legacy Tools Card */}
+          <div className="p-8 rounded-3xl bg-[#0D121D] border border-white/[0.08] flex flex-col justify-between opacity-80">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Legacy Commercial Tools (Vevox / Slido)
+                </span>
+              </div>
+
+              <div className="mb-6">
+                <span className="text-4xl font-black text-slate-400">$99+</span>
+                <span className="text-xs text-slate-500 ml-2">/ month for enterprise features</span>
+              </div>
+
+              <ul className="space-y-3 text-xs sm:text-sm text-slate-400">
+                <li className="flex items-center gap-2.5">
+                  <span className="text-rose-400 font-bold">✕</span>
+                  <span>Free tier capped at only 100 participants</span>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="text-rose-400 font-bold">✕</span>
+                  <span>AI quiz generation locked behind enterprise tier</span>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="text-rose-400 font-bold">✕</span>
+                  <span>Limited polls per event on free accounts</span>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="text-rose-400 font-bold">✕</span>
+                  <span>Data export locked behind paid subscriptions</span>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="text-rose-400 font-bold">✕</span>
+                  <span>Aggressive upgrade prompts during live sessions</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-8 pt-4 border-t border-white/[0.06] text-center text-xs text-slate-500">
+              Why pay monthly fees when you can host your own platform for free?
             </div>
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* Final Action CTA Banner */}
+      <section className="relative z-10 py-20 px-6 max-w-5xl mx-auto">
+        <div className="p-10 sm:p-14 rounded-3xl bg-gradient-to-tr from-violet-900/40 via-slate-900 to-indigo-950/40 border border-violet-500/30 text-center shadow-2xl relative overflow-hidden">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+            Ready to energize your next session?
+          </h2>
+          <p className="text-sm sm:text-base text-slate-300 max-w-lg mx-auto mb-8">
+            Create an interactive room in under 5 seconds. No account required to test or present.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <button
+              onClick={() => router.push('/host')}
+              className="px-6 py-3.5 text-xs sm:text-sm font-semibold text-white bg-violet-600 hover:bg-violet-500 rounded-xl shadow-lg shadow-violet-600/30 flex items-center gap-2 cursor-pointer transition-all"
+            >
+              <span>Launch Host Command Center</span>
+              <ArrowRight size={15} />
+            </button>
+            <button
+              onClick={() => router.push('/present/123-456-789')}
+              className="px-6 py-3.5 text-xs sm:text-sm font-semibold text-slate-300 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-xl cursor-pointer transition-all"
+            >
+              View Presenter Projector HUD
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 bg-slate-950/80 py-8 px-6 sm:px-10 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-slate-400">SURV Interactive</span>
-          <span>•</span>
-          <span>Next.js 16 • Tailwind CSS • Supabase Realtime • Google Gemini AI</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <span className="hover:text-slate-300 cursor-pointer" onClick={() => router.push('/host')}>
-            Host Dashboard
-          </span>
-          <span className="hover:text-slate-300 cursor-pointer" onClick={() => handleLaunchDemo('presenter')}>
-            Presenter View
-          </span>
-          <span className="hover:text-slate-300 cursor-pointer" onClick={() => handleLaunchDemo('participant')}>
-            Participant View
-          </span>
+      <footer className="border-t border-white/[0.06] bg-[#05070C] py-8 px-6 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-slate-300">SURV Interactive</span>
+            <span>•</span>
+            <span>Next.js 16 • Tailwind CSS v4 • Supabase Realtime • Google Gemini AI</span>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <span
+              className="hover:text-slate-300 cursor-pointer"
+              onClick={() => router.push('/host')}
+            >
+              Host Dashboard
+            </span>
+            <span
+              className="hover:text-slate-300 cursor-pointer"
+              onClick={() => router.push('/present/123-456-789')}
+            >
+              Presenter View
+            </span>
+            <span
+              className="hover:text-slate-300 cursor-pointer"
+              onClick={() => router.push('/app/123-456-789')}
+            >
+              Participant View
+            </span>
+          </div>
         </div>
       </footer>
     </div>
