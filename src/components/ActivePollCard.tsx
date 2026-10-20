@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Poll, PollResponse } from '@/types';
-import { Check, Send, Star, Lock, Sparkles, CheckCircle2, XCircle, BarChart3, Cloud, Zap, FileText } from 'lucide-react';
+import { Check, Send, Star, Lock, Sparkles, CheckCircle2, XCircle, BarChart3, Cloud, Zap, FileText, Clock } from 'lucide-react';
 import BarChartVisualizer from './BarChartVisualizer';
 import WordCloudVisualizer from './WordCloudVisualizer';
 import RatingVisualizer from './RatingVisualizer';
@@ -40,6 +40,34 @@ export default function ActivePollCard({
   );
   const [submitted, setSubmitted] = useState(hasVoted);
 
+  // Countdown timer support for timed questions
+  const [timeLeft, setTimeLeft] = useState<number | null>(
+    poll.timeLimit && poll.timeLimit > 0 ? poll.timeLimit : null
+  );
+
+  useEffect(() => {
+    if (!poll.timeLimit || poll.timeLimit <= 0) {
+      setTimeLeft(null);
+      return;
+    }
+    setTimeLeft(poll.timeLimit);
+    if (!poll.isOpen) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev === null || prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [poll.id, poll.timeLimit, poll.isOpen]);
+
+  const isExpired = Boolean(poll.timeLimit && poll.timeLimit > 0 && timeLeft === 0);
+
   // Sync state if user response comes in
   useEffect(() => {
     if (userResponse) {
@@ -55,7 +83,7 @@ export default function ActivePollCard({
   }, [userResponse]);
 
   const handleOptionClick = (optId: string) => {
-    if (!poll.isOpen) return;
+    if (!poll.isOpen || isExpired) return;
     setSelectedOption(optId);
     onSubmitVote(optId);
     setSubmitted(true);
@@ -63,13 +91,13 @@ export default function ActivePollCard({
 
   const handleWordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!wordInput.trim() || !poll.isOpen) return;
+    if (!wordInput.trim() || !poll.isOpen || isExpired) return;
     onSubmitVote(wordInput.trim());
     setSubmitted(true);
   };
 
   const handleRatingClick = (val: number) => {
-    if (!poll.isOpen) return;
+    if (!poll.isOpen || isExpired) return;
     setRatingInput(val);
     onSubmitVote(val);
     setSubmitted(true);
@@ -77,7 +105,7 @@ export default function ActivePollCard({
 
   const handleOpenTextSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!openTextInput.trim() || !poll.isOpen) return;
+    if (!openTextInput.trim() || !poll.isOpen || isExpired) return;
     onSubmitVote(openTextInput.trim());
     setSubmitted(true);
   };
@@ -122,7 +150,22 @@ export default function ActivePollCard({
         </span>
 
         <div className="flex items-center gap-2">
-          {poll.isOpen ? (
+          {poll.timeLimit && poll.timeLimit > 0 && (
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tabular-nums border ${
+                timeLeft === 0
+                  ? 'text-rose-300 bg-rose-950/60 border-rose-800/40'
+                  : timeLeft !== null && timeLeft <= 5
+                  ? 'text-amber-300 bg-amber-950/60 border-amber-800/40 font-bold'
+                  : 'text-[#c6f19d] bg-[#233B31] border-[#2D4A3E]'
+              }`}
+            >
+              <Clock size={12} />
+              <span>{timeLeft === 0 ? "Time's up" : `${timeLeft}s left`}</span>
+            </span>
+          )}
+
+          {poll.isOpen && !isExpired ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-emerald-300 bg-emerald-950/60 border border-emerald-800/40">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <span>Live voting</span>
@@ -130,11 +173,23 @@ export default function ActivePollCard({
           ) : (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-rose-300 bg-rose-950/60 border border-rose-800/40">
               <Lock size={12} />
-              <span>Voting closed</span>
+              <span>{isExpired ? "Time's up" : "Voting closed"}</span>
             </span>
           )}
         </div>
       </div>
+
+      {/* Live Countdown Progress Bar */}
+      {poll.timeLimit && poll.timeLimit > 0 && timeLeft !== null && poll.isOpen && !isExpired && (
+        <div className="w-full h-1.5 bg-[#15261F] rounded-full overflow-hidden -mt-2 border border-[#2D4A3E]/40">
+          <div
+            className={`h-full transition-[width] duration-1000 ease-linear rounded-full ${
+              timeLeft <= 5 ? 'bg-amber-400' : 'bg-[#c6f19d]'
+            }`}
+            style={{ width: `${(timeLeft / poll.timeLimit) * 100}%` }}
+          />
+        </div>
+      )}
 
       {/* Question Title */}
       <h2 className="text-xl sm:text-2xl font-bold text-[#E6E5DC] leading-snug">
@@ -142,10 +197,10 @@ export default function ActivePollCard({
       </h2>
 
       {/* Voting Closed notice if applicable */}
-      {!poll.isOpen && (
+      {(!poll.isOpen || isExpired) && (
         <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-800/30 text-rose-300 text-xs sm:text-sm flex items-center gap-2">
           <Lock size={15} className="shrink-0" />
-          <span>Voting has been concluded by the presenter.</span>
+          <span>{isExpired ? "Time has expired for this question." : "Voting has been concluded by the presenter."}</span>
         </div>
       )}
 

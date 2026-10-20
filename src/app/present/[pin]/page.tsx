@@ -33,6 +33,7 @@ import {
   Sparkles,
   ArrowLeft,
   Award,
+  Clock,
 } from 'lucide-react';
 
 interface PresenterPageProps {
@@ -53,6 +54,33 @@ function PresenterContent({ params }: PresenterPageProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showQuizLeaderboard, setShowQuizLeaderboard] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Countdown timer for timed poll questions on stage
+  const [stageTimeLeft, setStageTimeLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!activePoll?.timeLimit || activePoll.timeLimit <= 0) {
+      setStageTimeLeft(null);
+      return;
+    }
+    setStageTimeLeft(activePoll.timeLimit);
+    if (!activePoll.isOpen) return;
+
+    const interval = setInterval(() => {
+      setStageTimeLeft(prev => {
+        if (prev === null || prev <= 1) {
+          clearInterval(interval);
+          // Conclude voting when timer expires
+          const updated = updatePoll(activePoll.id, { isOpen: false });
+          if (updated) setActivePoll(updated);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activePoll?.id, activePoll?.timeLimit, activePoll?.isOpen]);
 
   // Auto-hide controls timer
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -308,6 +336,21 @@ function PresenterContent({ params }: PresenterPageProps) {
                     <span>Voting concluded</span>
                   </span>
                 )}
+
+                {activePoll.timeLimit && activePoll.timeLimit > 0 && (
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold tabular-nums border ${
+                      stageTimeLeft === 0
+                        ? 'text-rose-300 bg-rose-950/60 border-rose-800/40'
+                        : stageTimeLeft !== null && stageTimeLeft <= 5
+                        ? 'text-amber-300 bg-amber-950/60 border-amber-800/40 font-bold'
+                        : 'text-[#c6f19d] bg-[#233B31] border-[#2D4A3E]'
+                    }`}
+                  >
+                    <Clock size={12} />
+                    <span>{stageTimeLeft === 0 ? "Time's up" : `${stageTimeLeft}s remaining`}</span>
+                  </span>
+                )}
               </div>
 
               {activePoll.type === 'quiz' && (
@@ -320,6 +363,18 @@ function PresenterContent({ params }: PresenterPageProps) {
                 </button>
               )}
             </div>
+
+            {/* Live Countdown Progress Bar on Stage */}
+            {activePoll.timeLimit && activePoll.timeLimit > 0 && stageTimeLeft !== null && activePoll.isOpen && (
+              <div className="w-full max-w-4xl mx-auto h-2 bg-[#15261F] rounded-full overflow-hidden border border-[#2D4A3E]/40">
+                <div
+                  className={`h-full transition-[width] duration-1000 ease-linear rounded-full ${
+                    stageTimeLeft <= 5 ? 'bg-amber-400' : 'bg-[#c6f19d]'
+                  }`}
+                  style={{ width: `${(stageTimeLeft / activePoll.timeLimit) * 100}%` }}
+                />
+              </div>
+            )}
 
             {/* Question Heading */}
             <h2 className="text-3xl sm:text-5xl font-bold text-center text-[#E6E5DC] leading-tight max-w-4xl mx-auto">
