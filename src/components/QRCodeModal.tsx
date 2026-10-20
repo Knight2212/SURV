@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Copy, Check, QrCode } from 'lucide-react';
+import { X, Copy, Check, QrCode, ExternalLink } from 'lucide-react';
 
 interface QRCodeModalProps {
   pin: string;
@@ -24,14 +24,16 @@ export default function QRCodeModal({
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const url = `${window.location.origin}/app/${pin.replace(/\s+/g, '-')}`;
+      const cleanPin = pin.trim().replace(/\s+/g, '-');
+      const url = `${window.location.origin}/app/${cleanPin}`;
       setJoinUrl(url);
 
       QRCode.toDataURL(url, {
         width: 360,
         margin: 2,
+        errorCorrectionLevel: 'M',
         color: {
-          dark: '#181F1C',
+          dark: '#13231D',
           light: '#FFFFFF',
         },
       })
@@ -102,36 +104,54 @@ export default function QRCodeModal({
           </div>
 
           {/* PIN Display */}
-          <div className="mb-5 space-y-0.5">
+          <div className="mb-4 space-y-0.5">
             <span className="text-xs font-semibold text-[#8C9188]">
               Session PIN
             </span>
             <div className="text-2xl font-bold tracking-widest text-[#c6f19d] tabular-nums">
               {pin}
             </div>
+            {joinUrl && (
+              <span className="text-[11px] text-[#8C9188] break-all block pt-1 select-all">
+                {joinUrl}
+              </span>
+            )}
           </div>
 
-          {/* 1-Click Copy Link */}
-          <button
-            onClick={handleCopy}
-            className={`w-full py-3 px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-colors cursor-pointer ${
-              copied
-                ? 'bg-[#2D4A3E] text-[#c6f19d] border-[#c6f19d]'
-                : 'bg-[#233B31] hover:bg-[#2D4A3E] text-[#E6E5DC] border-[#283E34]'
-            }`}
-          >
-            {copied ? (
-              <>
-                <Check size={16} className="text-[#c6f19d]" />
-                <span>Link Copied to Clipboard</span>
-              </>
-            ) : (
-              <>
-                <Copy size={16} />
-                <span>Copy Direct Join Link</span>
-              </>
-            )}
-          </button>
+          {/* Action Buttons: Copy Link & Test Link */}
+          <div className="flex items-center gap-2 w-full">
+            <button
+              onClick={handleCopy}
+              className={`flex-1 py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-colors cursor-pointer ${
+                copied
+                  ? 'bg-[#2D4A3E] text-[#c6f19d] border-[#c6f19d]'
+                  : 'bg-[#233B31] hover:bg-[#2D4A3E] text-[#E6E5DC] border-[#283E34]'
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check size={15} className="text-[#c6f19d]" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy size={15} />
+                  <span>Copy Join Link</span>
+                </>
+              )}
+            </button>
+
+            <a
+              href={joinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-2.5 px-3.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 bg-[#c6f19d] hover:bg-[#b5e886] text-[#13231d] transition-colors cursor-pointer shrink-0"
+              title="Test by opening participant view in new tab"
+            >
+              <ExternalLink size={14} />
+              <span>Test Link</span>
+            </a>
+          </div>
         </motion.div>
       </div>
     </AnimatePresence>

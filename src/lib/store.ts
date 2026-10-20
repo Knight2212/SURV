@@ -673,3 +673,55 @@ export function getSurveyResponses(surveyId: string): SurveyResponse[] {
   const allResponses = readLocal<SurveyResponse[]>('survey_responses', []);
   return allResponses.filter(r => r.surveyId === surveyId);
 }
+
+export function createSurvey(data: {
+  roomId: string;
+  title: string;
+  description?: string;
+  questions: {
+    id: string;
+    title: string;
+    type: 'rating' | 'open_text' | 'choice';
+    options?: string[];
+    required?: boolean;
+  }[];
+}): Survey {
+  initializeStore();
+  const allSurveys = readLocal<Survey[]>('surveys', []);
+  const survey: Survey = {
+    id: 'survey-' + Date.now(),
+    roomId: data.roomId,
+    title: data.title,
+    description: data.description || '',
+    questions: data.questions,
+    isOpen: true,
+    createdAt: new Date().toISOString(),
+  };
+  const updated = [survey, ...allSurveys];
+  writeLocal('surveys', updated);
+  emitRealtimeEvent({ type: 'SURVEY_STATE_CHANGED', survey });
+  return survey;
+}
+
+export function updateSurvey(id: string, updates: Partial<Survey>): Survey | null {
+  initializeStore();
+  const allSurveys = readLocal<Survey[]>('surveys', []);
+  const idx = allSurveys.findIndex(s => s.id === id);
+  if (idx === -1) return null;
+  const updatedSurvey = { ...allSurveys[idx], ...updates };
+  allSurveys[idx] = updatedSurvey;
+  writeLocal('surveys', allSurveys);
+  emitRealtimeEvent({ type: 'SURVEY_STATE_CHANGED', survey: updatedSurvey });
+  return updatedSurvey;
+}
+
+export function deleteSurvey(id: string): void {
+  initializeStore();
+  const allSurveys = readLocal<Survey[]>('surveys', []);
+  const target = allSurveys.find(s => s.id === id);
+  const remaining = allSurveys.filter(s => s.id !== id);
+  writeLocal('surveys', remaining);
+  if (target) {
+    emitRealtimeEvent({ type: 'SURVEY_STATE_CHANGED', survey: target });
+  }
+}
