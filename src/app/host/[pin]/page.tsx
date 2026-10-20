@@ -25,7 +25,6 @@ import RatingVisualizer from '@/components/RatingVisualizer';
 import QRCodeModal from '@/components/QRCodeModal';
 import AIGeneratorModal from '@/components/AIGeneratorModal';
 import {
-  Radio,
   Plus,
   Play,
   RotateCcw,
@@ -40,13 +39,14 @@ import {
   Monitor,
   Smartphone,
   Download,
-  Settings,
   ArrowLeft,
-  Search,
   Users,
   CheckCircle2,
-  Award,
   Sparkles,
+  BarChart2,
+  MessageSquare,
+  ClipboardList,
+  Settings,
 } from 'lucide-react';
 
 interface HostRoomPageProps {
@@ -90,7 +90,6 @@ function HostRoomContent({ params }: HostRoomPageProps) {
     const roomPolls = getPollsForRoom(targetRoom.id);
     setPolls(roomPolls);
 
-    // Pick active poll or first poll
     const currentActive = roomPolls.find(p => p.id === targetRoom.activePollId) || roomPolls[0] || null;
     setSelectedPoll(prev => (prev ? roomPolls.find(p => p.id === prev.id) || currentActive : currentActive));
 
@@ -154,33 +153,21 @@ function HostRoomContent({ params }: HostRoomPageProps) {
   };
 
   const handleDeletePoll = (pollId: string) => {
-    if (confirm('Are you sure you want to delete this poll?')) {
+    if (!room) return;
+    if (confirm('Delete this question permanently?')) {
       deletePoll(pollId);
-      const remaining = polls.filter(p => p.id !== pollId);
+      const remaining = getPollsForRoom(room.id);
       setPolls(remaining);
-      if (selectedPoll?.id === pollId) {
-        setSelectedPoll(remaining[0] || null);
+      setSelectedPoll(remaining[0] || null);
+      if (room.activePollId === pollId) {
+        updateRoom(room.id, { activePollId: remaining[0]?.id || null });
       }
     }
   };
 
-  // Add Option to New Poll modal
   const handleAddOption = () => {
+    if (newPollOptions.length >= 8) return;
     setNewPollOptions([...newPollOptions, { text: `Option ${newPollOptions.length + 1}`, isCorrect: false }]);
-  };
-
-  const handleOptionChange = (idx: number, text: string) => {
-    const updated = [...newPollOptions];
-    updated[idx].text = text;
-    setNewPollOptions(updated);
-  };
-
-  const handleOptionCorrectToggle = (idx: number) => {
-    const updated = newPollOptions.map((opt, i) => ({
-      ...opt,
-      isCorrect: i === idx ? !opt.isCorrect : false, // single correct
-    }));
-    setNewPollOptions(updated);
   };
 
   const handleRemoveOption = (idx: number) => {
@@ -188,46 +175,56 @@ function HostRoomContent({ params }: HostRoomPageProps) {
     setNewPollOptions(newPollOptions.filter((_, i) => i !== idx));
   };
 
+  const handleOptionChange = (idx: number, text: string) => {
+    setNewPollOptions(newPollOptions.map((opt, i) => (i === idx ? { ...opt, text } : opt)));
+  };
+
+  const handleOptionCorrectToggle = (idx: number) => {
+    setNewPollOptions(
+      newPollOptions.map((opt, i) => ({
+        ...opt,
+        isCorrect: i === idx ? !opt.isCorrect : false,
+      }))
+    );
+  };
+
   const handleCreatePollSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPollTitle.trim() || !room) return;
+    if (!room || !newPollTitle.trim()) return;
 
-    const formattedOptions = (newPollType === 'multiple_choice' || newPollType === 'quiz')
-      ? newPollOptions.map((opt, i) => ({
-          id: 'opt-' + Date.now() + '-' + i,
-          text: opt.text.trim(),
-          isCorrect: opt.isCorrect,
-        }))
-      : [];
-
+    const colors = ['#2D4A3E', '#EA580C', '#22C55E', '#0EA5E9', '#D97706'];
     const created = createPoll({
       roomId: room.id,
       title: newPollTitle.trim(),
       type: newPollType,
-      options: formattedOptions,
+      options: newPollOptions.map((opt, i) => ({
+        id: `opt-${Date.now()}-${i}`,
+        text: opt.text.trim() || `Option ${i + 1}`,
+        isCorrect: opt.isCorrect,
+        color: colors[i % colors.length],
+      })),
       isOpen: true,
       showResults: true,
       showCorrect: newPollType === 'quiz',
       timeLimit: typeof newPollTimer === 'number' ? newPollTimer : null,
     });
 
-    const updatedList = [...polls, created];
-    setPolls(updatedList);
+    loadData(room.pin);
     setSelectedPoll(created);
     updateRoom(room.id, { activePollId: created.id });
 
-    // Reset modal
+    // Reset Form
     setNewPollTitle('');
+    setNewPollType('multiple_choice');
     setNewPollOptions([
       { text: 'Option 1', isCorrect: false },
       { text: 'Option 2', isCorrect: false },
     ]);
-    setNewPollTimer('');
     setShowCreatePollModal(false);
   };
 
   const handleAIGeneratedQuestions = (
-    generatedQuestions: Array<{
+    questionsList: Array<{
       title: string;
       type: PollType;
       options: Array<{ text: string; isCorrect: boolean }>;
@@ -235,10 +232,10 @@ function HostRoomContent({ params }: HostRoomPageProps) {
     }>
   ) => {
     if (!room) return;
+    const colors = ['#2D4A3E', '#EA580C', '#22C55E', '#0EA5E9', '#D97706'];
     let firstCreated: Poll | null = null;
-    const colors = ['#10B981', '#06B6D4', '#F59E0B', '#3B82F6', '#EC4899', '#14B8A6'];
 
-    generatedQuestions.forEach((q, idx) => {
+    questionsList.forEach((q, idx) => {
       const created = createPoll({
         roomId: room.id,
         title: q.title,
@@ -267,7 +264,6 @@ function HostRoomContent({ params }: HostRoomPageProps) {
     }
   };
 
-  // Export Data to JSON
   const handleExportData = () => {
     if (!room) return;
     const exportPayload = {
@@ -295,18 +291,24 @@ function HostRoomContent({ params }: HostRoomPageProps) {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--text-muted)' }}>Loading session...</p>
+      <div className="min-h-[100svh] bg-[#283E34] p-4 text-[#181F1C] flex items-center justify-center">
+        <div className="p-8 rounded-2xl bg-[#E6E5DC] text-center space-y-2">
+          <p className="text-sm font-medium text-[#5F665E]">Loading session command center...</p>
+        </div>
       </div>
     );
   }
 
   if (!room) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="glass-panel" style={{ padding: '36px', textAlign: 'center' }}>
-          <h2>Session Not Found</h2>
-          <button onClick={() => router.push('/host')} className="glow-btn" style={{ marginTop: '16px' }}>
+      <div className="min-h-[100svh] bg-[#283E34] p-4 text-[#181F1C] flex items-center justify-center">
+        <div className="p-8 rounded-2xl bg-[#E6E5DC] text-center space-y-4 max-w-sm">
+          <h2 className="text-2xl font-semibold text-[#181F1C]">Session Not Found</h2>
+          <p className="text-sm text-[#5F665E]">Could not locate session with PIN {rawPin}.</p>
+          <button
+            onClick={() => router.push('/host')}
+            className="px-4 py-2 text-xs font-semibold text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg cursor-pointer transition-colors"
+          >
             Back to Dashboard
           </button>
         </div>
@@ -315,644 +317,566 @@ function HostRoomContent({ params }: HostRoomPageProps) {
   }
 
   return (
-    <div className="min-h-[100svh] flex flex-col bg-[#07090E] text-slate-100">
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 px-6 sm:px-8 py-3.5 border-b border-white/10 bg-[#07090E] flex items-center justify-between gap-4"> {/* taste-skill-ignore */}
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={() => router.push('/host')}
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-            title="Back to Sessions"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-base sm:text-lg font-extrabold text-white truncate max-w-xs sm:max-w-md">
-                {room.title}
-              </h1>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span>Live</span>
+    <div className="min-h-[100svh] bg-[#283E34] p-2 sm:p-4 text-[#181F1C]">
+      <div className="bg-[#E6E5DC] rounded-2xl sm:rounded-3xl min-h-[calc(100svh-1rem)] sm:min-h-[calc(100svh-2rem)] flex flex-col justify-between overflow-hidden">
+        {/* Top Header */}
+        <header className="px-6 sm:px-10 py-4 border-b border-[#D5D4CB]/60 flex items-center justify-between gap-4 bg-[#E6E5DC]"> {/* taste-skill-ignore */}
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => router.push('/host')}
+              className="p-2 text-[#5F665E] hover:text-[#181F1C] rounded-lg hover:bg-[#DFDDD3] transition-colors cursor-pointer"
+              title="Back to Sessions"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-base sm:text-lg font-bold text-[#181F1C] truncate max-w-xs sm:max-w-md">
+                  {room.title}
+                </h1>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-emerald-800 bg-emerald-100 border border-emerald-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                  <span>Live</span>
+                </span>
+              </div>
+              <span className="text-xs tabular-nums text-[#5F665E]">
+                PIN: <strong className="text-[#2D4A3E]">{room.pin}</strong>
               </span>
             </div>
-            <span className="text-xs tabular-nums font-semibold text-emerald-400">
-              PIN: {room.pin}
-            </span>
           </div>
+
+          {/* Quick Launch & Actions */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.open(`/present/${room.pin}`, '_blank')}
+              className="px-3.5 py-2 text-xs font-semibold text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Monitor size={14} />
+              <span className="hidden sm:inline">Presenter Screen</span>
+            </button>
+
+            <button
+              onClick={() => window.open(`/app/${room.pin}`, '_blank')}
+              className="px-3.5 py-2 text-xs font-semibold text-[#181F1C] bg-white hover:bg-[#F5F4EE] border border-[#D0CEC4] rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Smartphone size={14} />
+              <span className="hidden sm:inline">Participant App</span>
+            </button>
+
+            <button
+              onClick={() => setShowQRModal(true)}
+              className="p-2 text-[#181F1C] bg-white hover:bg-[#F5F4EE] border border-[#D0CEC4] rounded-lg transition-colors cursor-pointer"
+              title="Show Join QR Code"
+            >
+              <QrCode size={16} />
+            </button>
+
+            <button
+              onClick={handleExportData}
+              className="p-2 text-[#181F1C] bg-white hover:bg-[#F5F4EE] border border-[#D0CEC4] rounded-lg transition-colors cursor-pointer"
+              title="Export Session Data"
+            >
+              <Download size={16} />
+            </button>
+          </div>
+        </header>
+
+        {/* Tab Navigation */}
+        <div className="px-6 sm:px-10 py-2.5 bg-[#DFDDD3] border-b border-[#D0CEC4] flex items-center gap-2 overflow-x-auto"> {/* taste-skill-ignore */}
+          {[
+            { id: 'polls', label: `Polls (${polls.length})`, icon: BarChart2 },
+            { id: 'qa', label: `Audience Q&A (${questions.length})`, icon: MessageSquare },
+            { id: 'surveys', label: `Surveys (${surveys.length})`, icon: ClipboardList },
+            { id: 'settings', label: 'Settings', icon: Settings },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors flex items-center gap-1.5 ${
+                activeTab === tab.id
+                  ? 'bg-[#2D4A3E] text-white'
+                  : 'text-[#5F665E] hover:text-[#181F1C]'
+              }`}
+            >
+              <tab.icon size={13} />
+              <span>{tab.label}</span>
+            </button>
+          ))}
         </div>
 
-        {/* Quick Launch & Actions */}
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => window.open(`/present/${room.pin}`, '_blank')}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Monitor size={14} className="text-cyan-400" />
-            <span className="hidden sm:inline">Presenter Screen</span>
-          </button>
+        {/* Main Workspace */}
+        <main className="flex-1 p-6 sm:px-10 sm:py-6 max-w-7xl mx-auto w-full">
+          {/* TAB: POLLS */}
+          {activeTab === 'polls' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column: Polls List */}
+              <div className="lg:col-span-4 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                  <button
+                    onClick={() => setShowCreatePollModal(true)}
+                    className="w-full py-2.5 px-4 text-xs font-semibold text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  >
+                    <Plus size={15} />
+                    <span>Create New Poll</span>
+                  </button>
 
-          <button
-            onClick={() => window.open(`/app/${room.pin}`, '_blank')}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Smartphone size={14} className="text-emerald-400" />
-            <span className="hidden sm:inline">Participant App</span>
-          </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAIGeneratorModal(true)}
+                    className="w-full py-2.5 px-4 text-xs font-semibold text-[#181F1C] bg-white hover:bg-[#F5F4EE] border border-[#D0CEC4] rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  >
+                    <Sparkles size={14} className="text-[#EA580C]" />
+                    <span>Generate with AI</span>
+                  </button>
+                </div>
 
-          <button
-            onClick={() => setShowQRModal(true)}
-            className="p-2 text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors cursor-pointer"
-            title="Show Join QR Code"
-          >
-            <QrCode size={16} />
-          </button>
+                <div className="space-y-2">
+                  {polls.map((p, idx) => {
+                    const isSelected = selectedPoll?.id === p.id;
+                    const isActiveOnScreen = room.activePollId === p.id;
 
-          <button
-            onClick={handleExportData}
-            className="p-2 text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors cursor-pointer"
-            title="Export Session Data"
-          >
-            <Download size={16} />
-          </button>
-        </div>
-      </header>
-
-      {/* Tabs */}
-      <div className="px-6 sm:px-8 py-2.5 bg-slate-950/60 border-b border-white/10 flex items-center gap-2 overflow-x-auto"> {/* taste-skill-ignore */}
-        {[
-          { id: 'polls', label: `Polls (${polls.length})` },
-          { id: 'qa', label: `Audience Q&A (${questions.length})` },
-          { id: 'surveys', label: `Surveys (${surveys.length})` },
-          { id: 'settings', label: 'Room Settings' },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
-              activeTab === tab.id
-                ? 'bg-white text-[#0A0D12]'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Main Workspace */}
-      <main className="flex-1 p-6 sm:p-8 max-w-7xl mx-auto w-full">
-        {/* TAB: POLLS */}
-        {activeTab === 'polls' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px', alignItems: 'start' }}>
-            {/* Left Column: Polls List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <button
-                  onClick={() => setShowCreatePollModal(true)}
-                  className="glow-btn"
-                  style={{ width: '100%', justifyContent: 'center', padding: '12px' }}
-                >
-                  <Plus size={16} /> Create New Poll
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowAIGeneratorModal(true)}
-                  style={{
-                    width: '100%',
-                    justifyContent: 'center',
-                    padding: '11px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    borderRadius: 'var(--radius-sm)',
-                    background: '#161E2C',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    color: '#FFFFFF',
-                    fontWeight: 600,
-                    fontSize: '0.88rem',
-                    cursor: 'pointer',
-                  }}
-                  className="hover:bg-[#1D2738] transition-colors"
-                >
-                  <Sparkles size={16} className="text-emerald-400" /> Generate with Gemini AI
-                </button>
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => setSelectedPoll(p)}
+                        className={`p-3.5 rounded-xl border transition-colors cursor-pointer text-left space-y-1.5 ${
+                          isSelected
+                            ? 'bg-white border-[#2D4A3E]'
+                            : 'bg-[#DFDDD3] border-[#D0CEC4] hover:bg-[#D7D5CB]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-semibold text-[#5F665E]">
+                            #{idx + 1} &bull; {p.type.replace('_', ' ')}
+                          </span>
+                          {isActiveOnScreen && (
+                            <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                              <span>On Stage</span>
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs font-semibold text-[#181F1C] leading-snug line-clamp-2">
+                          {p.title}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {polls.map((p, idx) => {
-                  const isSelected = selectedPoll?.id === p.id;
-                  const isActiveOnScreen = room.activePollId === p.id;
-
-                  return (
-                    <div
-                      key={p.id}
-                      onClick={() => setSelectedPoll(p)}
-                      className="glass-panel"
-                      style={{
-                        padding: '14px',
-                        cursor: 'pointer',
-                        background: isSelected ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.02)',
-                        border: `1px solid ${isSelected ? 'var(--primary)' : 'var(--border-subtle)'}`,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '6px',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dim)' }}>
-                          #{idx + 1} • {p.type.toUpperCase().replace('_', ' ')}
+              {/* Right Column: Selected Poll Inspector */}
+              <div className="lg:col-span-8">
+                {selectedPoll ? (
+                  <div className="p-6 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-6">
+                    {/* Header and Controls Toolbar */}
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div>
+                        <span className="text-xs font-medium text-[#5F665E] block">
+                          Format: {selectedPoll.type.replace('_', ' ')}
                         </span>
-                        {isActiveOnScreen && (
-                          <span className="badge badge-live" style={{ fontSize: '0.65rem', padding: '2px 6px' }}>
-                            <span className="badge-pulse" /> Presenting
+                        <h2 className="text-xl sm:text-2xl font-bold text-[#181F1C] mt-0.5">
+                          {selectedPoll.title}
+                        </h2>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {/* Launch / Active on screen */}
+                        <button
+                          onClick={() => handleLaunchPoll(selectedPoll)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors ${
+                            room.activePollId === selectedPoll.id
+                              ? 'bg-emerald-800 text-white'
+                              : 'bg-[#2D4A3E] text-white hover:bg-[#233B31]'
+                          }`}
+                        >
+                          <Play size={13} />
+                          <span>{room.activePollId === selectedPoll.id ? 'Active on Screen' : 'Launch to Screen'}</span>
+                        </button>
+
+                        {/* Open/Close Voting */}
+                        <button
+                          onClick={handleToggleVoting}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-colors cursor-pointer ${
+                            selectedPoll.isOpen
+                              ? 'bg-rose-100 text-rose-800 border-rose-300'
+                              : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                          }`}
+                        >
+                          {selectedPoll.isOpen ? <Lock size={13} /> : <LockOpen size={13} />}
+                          <span>{selectedPoll.isOpen ? 'Close Voting' : 'Open Voting'}</span>
+                        </button>
+
+                        {/* Reveal Results */}
+                        <button
+                          onClick={handleToggleShowResults}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#181F1C] bg-white hover:bg-[#F5F4EE] border border-[#D0CEC4] flex items-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          {selectedPoll.showResults ? <EyeOff size={13} /> : <Eye size={13} />}
+                          <span>{selectedPoll.showResults ? 'Hide Results' : 'Show Results'}</span>
+                        </button>
+
+                        {/* Show Correct Answer (if quiz or MCQ) */}
+                        {(selectedPoll.type === 'quiz' || selectedPoll.type === 'multiple_choice') && (
+                          <button
+                            onClick={handleToggleShowCorrect}
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#181F1C] bg-white hover:bg-[#F5F4EE] border border-[#D0CEC4] flex items-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <CheckCircle size={13} />
+                            <span>{selectedPoll.showCorrect ? 'Hide Correct' : 'Show Correct'}</span>
+                          </button>
+                        )}
+
+                        {/* Reset responses */}
+                        <button
+                          onClick={handleResetResponses}
+                          className="p-1.5 rounded-lg text-[#5F665E] hover:text-[#181F1C] bg-white border border-[#D0CEC4] cursor-pointer"
+                          title="Reset responses"
+                        >
+                          <RotateCcw size={14} />
+                        </button>
+
+                        {/* Delete poll */}
+                        <button
+                          onClick={() => handleDeletePoll(selectedPoll.id)}
+                          className="p-1.5 rounded-lg text-rose-600 hover:text-rose-700 bg-white border border-[#D0CEC4] cursor-pointer"
+                          title="Delete poll"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Results Monitor Preview */}
+                    <div className="p-6 rounded-xl bg-white border border-[#D0CEC4] space-y-4">
+                      <div className="flex items-center justify-between text-xs text-[#5F665E] border-b border-[#D0CEC4] pb-2.5"> {/* taste-skill-ignore */}
+                        <span className="font-semibold text-[#181F1C] tabular-nums">
+                          Live Results Monitor ({responses.length} votes recorded)
+                        </span>
+                        <span>{selectedPoll.showResults ? 'Visible on Stage' : 'Hidden on Stage'}</span>
+                      </div>
+
+                      {selectedPoll.type === 'multiple_choice' || selectedPoll.type === 'quiz' ? (
+                        <BarChartVisualizer poll={selectedPoll} responses={responses} />
+                      ) : selectedPoll.type === 'word_cloud' ? (
+                        <WordCloudVisualizer responses={responses} />
+                      ) : selectedPoll.type === 'rating' ? (
+                        <RatingVisualizer responses={responses} />
+                      ) : (
+                        <div className="space-y-2">
+                          {responses.map(r => (
+                            <div key={r.id} className="p-3 bg-[#EBEAE3] rounded-lg text-xs text-[#181F1C]">
+                              &quot;{String(r.value)}&quot;
+                            </div>
+                          ))}
+                          {responses.length === 0 && (
+                            <p className="text-xs text-[#8C9188] text-center py-6">No open responses submitted yet.</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-16 text-center rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] text-[#5F665E]">
+                    <p className="text-sm">Select a poll from the left or create a new one to begin.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: AUDIENCE Q&A */}
+          {activeTab === 'qa' && (
+            <div className="p-6 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-6">
+              <div>
+                <h2 className="text-xl font-bold text-[#181F1C]">Live Q&amp;A Moderation Queue</h2>
+                <p className="text-xs text-[#5F665E]">
+                  Pin high-priority questions to highlight them on the main stage screen, mark answered, or dismiss.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {questions.map(q => (
+                  <div
+                    key={q.id}
+                    className="p-4 rounded-xl bg-white border border-[#D0CEC4] flex items-center justify-between gap-4"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-bold text-[#181F1C]">{q.authorName}</span>
+                        <span className="text-[11px] text-[#8C9188] tabular-nums">
+                          &bull; {new Date(q.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        {q.isPinned && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2D4A3E] text-white">
+                            Pinned on Stage
+                          </span>
+                        )}
+                        {q.isAnswered && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                            Answered
                           </span>
                         )}
                       </div>
-
-                      <strong style={{ fontSize: '0.9rem', color: '#FFFFFF', lineHeight: 1.3 }}>
-                        {p.title}
-                      </strong>
+                      <p className="text-sm text-[#181F1C] leading-snug">{q.text}</p>
+                      <span className="text-xs text-[#2D4A3E] font-semibold mt-1 block tabular-nums">
+                        ▲ {q.upvotes} upvotes
+                      </span>
                     </div>
-                  );
-                })}
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateQAQuestion(q.id, { isPinned: !q.isPinned })}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#EBEAE3] hover:bg-[#DFDDD3] text-[#181F1C] flex items-center gap-1 cursor-pointer transition-colors"
+                      >
+                        <Pin size={12} />
+                        <span>{q.isPinned ? 'Unpin' : 'Pin to Screen'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => updateQAQuestion(q.id, { isAnswered: !q.isAnswered })}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#EBEAE3] hover:bg-[#DFDDD3] text-[#181F1C] flex items-center gap-1 cursor-pointer transition-colors"
+                      >
+                        <CheckCircle size={12} />
+                        <span>{q.isAnswered ? 'Unmark' : 'Mark Answered'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => deleteQAQuestion(q.id)}
+                        className="p-1.5 rounded-lg text-rose-600 hover:text-rose-700 bg-[#EBEAE3] cursor-pointer"
+                        title="Dismiss question"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {questions.length === 0 && (
+                  <div className="text-center py-12 text-xs text-[#5F665E]">
+                    No audience questions submitted yet.
+                  </div>
+                )}
               </div>
             </div>
+          )}
 
-            {/* Right Column: Selected Poll Inspector & Controls */}
-            {selectedPoll ? (
-              <div className="glass-panel" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {/* Poll Header & Controls Toolbar */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-                  <div>
-                    <span className="badge" style={{ background: 'rgba(99, 102, 241, 0.15)', color: 'var(--primary)', marginBottom: '8px' }}>
-                      {selectedPoll.type.replace('_', ' ').toUpperCase()}
-                    </span>
-                    <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', marginTop: '4px' }}>
-                      {selectedPoll.title}
-                    </h2>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    {/* Launch / Push to Projector */}
-                    <button
-                      onClick={() => handleLaunchPoll(selectedPoll)}
-                      className={room.activePollId === selectedPoll.id ? 'secondary-btn' : 'glow-btn'}
-                      style={{
-                        padding: '8px 14px',
-                        fontSize: '0.85rem',
-                        borderColor: room.activePollId === selectedPoll.id ? 'var(--success)' : undefined,
-                        color: room.activePollId === selectedPoll.id ? 'var(--success)' : undefined,
-                      }}
-                    >
-                      <Play size={14} />
-                      {room.activePollId === selectedPoll.id ? 'Active on Screen' : 'Launch to Screen'}
-                    </button>
-
-                    {/* Open/Close Voting */}
-                    <button
-                      onClick={handleToggleVoting}
-                      className="secondary-btn"
-                      style={{
-                        padding: '8px 14px',
-                        fontSize: '0.85rem',
-                        color: selectedPoll.isOpen ? 'var(--danger)' : 'var(--success)',
-                      }}
-                    >
-                      {selectedPoll.isOpen ? <Lock size={14} /> : <LockOpen size={14} />}
-                      {selectedPoll.isOpen ? 'Close Voting' : 'Open Voting'}
-                    </button>
-
-                    {/* Reveal Results */}
-                    <button
-                      onClick={handleToggleShowResults}
-                      className="secondary-btn"
-                      style={{ padding: '8px 14px', fontSize: '0.85rem' }}
-                    >
-                      {selectedPoll.showResults ? <EyeOff size={14} /> : <Eye size={14} />}
-                      {selectedPoll.showResults ? 'Hide Results' : 'Show Results'}
-                    </button>
-
-                    {/* Show Correct Answer (if quiz or MCQ) */}
-                    {(selectedPoll.type === 'quiz' || selectedPoll.type === 'multiple_choice') && (
-                      <button
-                        onClick={handleToggleShowCorrect}
-                        className="secondary-btn"
-                        style={{
-                          padding: '8px 14px',
-                          fontSize: '0.85rem',
-                          color: selectedPoll.showCorrect ? 'var(--success)' : 'var(--text-main)',
-                        }}
-                      >
-                        <CheckCircle size={14} />
-                        {selectedPoll.showCorrect ? 'Hide Correct' : 'Show Correct'}
-                      </button>
+          {/* TAB: SURVEYS */}
+          {activeTab === 'surveys' && (
+            <div className="p-6 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-4">
+              <h2 className="text-xl font-bold text-[#181F1C]">Self-Paced Surveys</h2>
+              {surveys.map(survey => {
+                const responsesList = getSurveyResponses(survey.id);
+                return (
+                  <div key={survey.id} className="p-4 rounded-xl bg-white border border-[#D0CEC4] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#181F1C]">{survey.title}</h3>
+                      <span className="text-xs font-semibold text-[#2D4A3E] bg-emerald-50 px-2 py-0.5 rounded tabular-nums">
+                        {responsesList.length} submissions
+                      </span>
+                    </div>
+                    {survey.description && (
+                      <p className="text-xs text-[#5F665E]">{survey.description}</p>
                     )}
-
-                    {/* Reset responses */}
-                    <button
-                      onClick={handleResetResponses}
-                      className="secondary-btn"
-                      style={{ padding: '8px 12px' }}
-                      title="Reset Responses"
-                    >
-                      <RotateCcw size={15} />
-                    </button>
-
-                    {/* Delete Poll */}
-                    <button
-                      onClick={() => handleDeletePoll(selectedPoll.id)}
-                      className="secondary-btn"
-                      style={{ padding: '8px 12px', color: 'var(--danger)' }}
-                      title="Delete Poll"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Live Visualization Preview */}
-                <div style={{
-                  padding: '24px',
-                  background: 'rgba(0, 0, 0, 0.3)',
-                  borderRadius: 'var(--radius-lg)',
-                  border: '1px solid var(--border-subtle)',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                      LIVE RESULTS MONITOR ({responses.length} VOTES)
-                    </span>
-                    <span style={{ fontSize: '0.8rem', color: selectedPoll.showResults ? 'var(--success)' : 'var(--text-dim)' }}>
-                      {selectedPoll.showResults ? 'Visible on Projector & Mobile' : 'Hidden from Attendees'}
-                    </span>
-                  </div>
-
-                  {selectedPoll.type === 'multiple_choice' || selectedPoll.type === 'quiz' ? (
-                    <BarChartVisualizer poll={selectedPoll} responses={responses} />
-                  ) : selectedPoll.type === 'word_cloud' ? (
-                    <WordCloudVisualizer responses={responses} />
-                  ) : selectedPoll.type === 'rating' ? (
-                    <RatingVisualizer responses={responses} />
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {responses.map(r => (
-                        <div key={r.id} style={{ padding: '10px 14px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: 'var(--radius-sm)' }}>
-                          &quot;{String(r.value)}&quot;
+                    <div className="pt-2 space-y-1">
+                      {survey.questions.map((q, idx) => (
+                        <div key={q.id} className="p-2 bg-[#EBEAE3] rounded text-xs text-[#181F1C]">
+                          {idx + 1}. {q.title}
                         </div>
                       ))}
                     </div>
-                  )}
+                  </div>
+                );
+              })}
+              {surveys.length === 0 && (
+                <p className="text-xs text-[#5F665E] text-center py-8">No surveys created in this session.</p>
+              )}
+            </div>
+          )}
+
+          {/* TAB: SETTINGS */}
+          {activeTab === 'settings' && (
+            <div className="p-6 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] max-w-lg space-y-4">
+              <h2 className="text-xl font-bold text-[#181F1C]">Session Settings</h2>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-[#5F665E] block">Session Title</label>
+                <input
+                  type="text"
+                  value={room.title}
+                  onChange={e => {
+                    const updated = updateRoom(room.id, { title: e.target.value });
+                    if (updated) setRoom(updated);
+                  }}
+                  className="w-full bg-[#EBEAE3] border border-[#D0CEC4] rounded-lg px-3 py-2 text-sm text-[#181F1C] focus:outline-none focus:border-[#2D4A3E] transition-colors"
+                />
+              </div>
+
+              <label className="flex items-center gap-2.5 cursor-pointer pt-2">
+                <input
+                  type="checkbox"
+                  checked={room.allowAnonymousQA}
+                  onChange={e => {
+                    const updated = updateRoom(room.id, { allowAnonymousQA: e.target.checked });
+                    if (updated) setRoom(updated);
+                  }}
+                  className="w-4 h-4 rounded text-[#2D4A3E] focus:ring-[#2D4A3E] cursor-pointer"
+                />
+                <span className="text-xs text-[#181F1C] font-medium">Allow attendees to post Q&amp;A anonymously</span>
+              </label>
+            </div>
+          )}
+        </main>
+
+        {/* Create Poll Modal */}
+        {showCreatePollModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+            <form
+              onSubmit={handleCreatePollSubmit}
+              className="w-full max-w-lg p-6 sm:p-8 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-4"
+            >
+              <h2 className="text-lg font-bold text-[#181F1C]">Create New Poll</h2>
+
+              {/* Poll Type Selector */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-[#5F665E] block">Question Type</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'multiple_choice', label: 'Multiple Choice' },
+                    { id: 'word_cloud', label: 'Word Cloud' },
+                    { id: 'rating', label: 'Rating (1-5)' },
+                    { id: 'quiz', label: 'Quiz Battle' },
+                    { id: 'open_text', label: 'Open Feedback' },
+                  ].map(t => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setNewPollType(t.id as PollType)}
+                      className={`p-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer text-center ${
+                        newPollType === t.id
+                          ? 'bg-[#2D4A3E] text-white'
+                          : 'bg-white text-[#181F1C] border border-[#D0CEC4] hover:bg-[#F5F4EE]'
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ) : (
-              <div className="glass-panel" style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                Select a poll from the left or create a new one to begin.
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* TAB: AUDIENCE Q&A MODERATION */}
-        {activeTab === 'qa' && (
-          <div className="glass-panel" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#FFFFFF' }}>Live Q&A Moderation Queue</h2>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  Pin questions to feature them on the projector screen, mark answered, or dismiss.
-                </p>
+              {/* Title */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-[#5F665E] block">Question Prompt</label>
+                <input
+                  type="text"
+                  required
+                  value={newPollTitle}
+                  onChange={e => setNewPollTitle(e.target.value)}
+                  placeholder="e.g. Which initiative should we prioritize this quarter?"
+                  className="w-full bg-[#EBEAE3] border border-[#D0CEC4] rounded-lg px-3.5 py-2.5 text-sm text-[#181F1C] focus:outline-none focus:border-[#2D4A3E] transition-colors"
+                />
               </div>
-            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {questions.map(q => (
-                <div
-                  key={q.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '16px',
-                    borderRadius: 'var(--radius-md)',
-                    background: q.isPinned ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                    border: `1px solid ${q.isPinned ? 'var(--primary)' : 'var(--border-subtle)'}`,
-                    gap: '16px',
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{q.authorName}</span>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-                        • {new Date(q.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                      {q.isPinned && (
-                        <span className="badge" style={{ background: 'var(--primary)', color: '#FFFFFF', fontSize: '0.65rem' }}>
-                          PINNED ON PROJECTOR
-                        </span>
+              {/* Options list for MCQ and Quiz */}
+              {(newPollType === 'multiple_choice' || newPollType === 'quiz') && (
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-[#5F665E]">
+                      Choices {newPollType === 'quiz' && '(Select checkmark for correct answer)'}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleAddOption}
+                      className="text-xs font-semibold text-[#2D4A3E] hover:underline cursor-pointer"
+                    >
+                      + Add Choice
+                    </button>
+                  </div>
+
+                  {newPollOptions.map((opt, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      {newPollType === 'quiz' && (
+                        <button
+                          type="button"
+                          onClick={() => handleOptionCorrectToggle(idx)}
+                          className={`p-1.5 rounded cursor-pointer ${
+                            opt.isCorrect ? 'text-emerald-700' : 'text-[#8C9188]'
+                          }`}
+                          title={opt.isCorrect ? 'Correct Option' : 'Mark as Correct'}
+                        >
+                          <CheckCircle2 size={18} />
+                        </button>
                       )}
-                      {q.isAnswered && (
-                        <span className="badge" style={{ background: 'var(--success)', color: '#FFFFFF', fontSize: '0.65rem' }}>
-                          ANSWERED
-                        </span>
+
+                      <input
+                        type="text"
+                        required
+                        value={opt.text}
+                        onChange={e => handleOptionChange(idx, e.target.value)}
+                        placeholder={`Choice ${idx + 1}`}
+                        className="flex-1 bg-[#EBEAE3] border border-[#D0CEC4] rounded-lg px-3 py-2 text-xs text-[#181F1C] focus:outline-none focus:border-[#2D4A3E] transition-colors"
+                      />
+
+                      {newPollOptions.length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveOption(idx)}
+                          className="p-1.5 text-[#8C9188] hover:text-rose-600 cursor-pointer"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       )}
                     </div>
-                    <p style={{ fontSize: '1rem', color: '#FFFFFF' }}>{q.text}</p>
-                    <span style={{ fontSize: '0.8rem', color: '#10B981', fontWeight: 600, marginTop: '4px', display: 'block' }}>
-                      ▲ {q.upvotes} upvotes
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <button
-                      onClick={() => updateQAQuestion(q.id, { isPinned: !q.isPinned })}
-                      className="secondary-btn"
-                      style={{
-                        padding: '6px 12px',
-                        fontSize: '0.8rem',
-                        color: q.isPinned ? 'var(--primary)' : 'var(--text-muted)',
-                      }}
-                    >
-                      <Pin size={14} /> {q.isPinned ? 'Unpin' : 'Pin to Screen'}
-                    </button>
-
-                    <button
-                      onClick={() => updateQAQuestion(q.id, { isAnswered: !q.isAnswered })}
-                      className="secondary-btn"
-                      style={{
-                        padding: '6px 12px',
-                        fontSize: '0.8rem',
-                        color: q.isAnswered ? 'var(--success)' : 'var(--text-muted)',
-                      }}
-                    >
-                      <CheckCircle size={14} /> {q.isAnswered ? 'Unmark' : 'Mark Answered'}
-                    </button>
-
-                    <button
-                      onClick={() => deleteQAQuestion(q.id)}
-                      className="secondary-btn"
-                      style={{ padding: '6px 10px', color: 'var(--danger)' }}
-                      title="Dismiss Question"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              )}
 
-        {/* TAB: SURVEYS */}
-        {activeTab === 'surveys' && (
-          <div className="glass-panel" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#FFFFFF' }}>Self-Paced Surveys</h2>
-            {surveys.map(survey => {
-              const responsesList = getSurveyResponses(survey.id);
-              return (
-                <div key={survey.id} style={{ padding: '20px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <h3 style={{ fontSize: '1.15rem', color: '#FFFFFF' }}>{survey.title}</h3>
-                    <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--success)' }}>
-                      {responsesList.length} Submissions
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px' }}>{survey.description}</p>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {survey.questions.map((q, idx) => (
-                      <div key={q.id} style={{ padding: '10px', background: 'rgba(0, 0, 0, 0.2)', borderRadius: 'var(--radius-sm)' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#FFFFFF' }}>{idx + 1}. {q.title}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* TAB: ROOM SETTINGS */}
-        {activeTab === 'settings' && (
-          <div className="glass-panel" style={{ padding: '28px', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#FFFFFF' }}>Room Settings</h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Room Title</label>
-              <input
-                type="text"
-                value={room.title}
-                onChange={e => {
-                  const updated = updateRoom(room.id, { title: e.target.value });
-                  if (updated) setRoom(updated);
-                }}
-                style={{
-                  padding: '10px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-light)',
-                  color: '#FFFFFF',
-                }}
-              />
-            </div>
-
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={room.allowAnonymousQA}
-                onChange={e => {
-                  const updated = updateRoom(room.id, { allowAnonymousQA: e.target.checked });
-                  if (updated) setRoom(updated);
-                }}
-                style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
-              />
-              <span style={{ fontSize: '0.9rem', color: '#FFFFFF' }}>Allow attendees to post Q&A anonymously</span>
-            </label>
-          </div>
-        )}
-      </main>
-
-      {/* Create Poll Modal */}
-      {showCreatePollModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0, 0, 0, 0.85)',
-          backdropFilter: 'blur(10px)',
-          zIndex: 100,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px',
-        }}>
-          <form
-            onSubmit={handleCreatePollSubmit}
-            className="glass-panel"
-            style={{ width: '100%', maxWidth: '520px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '18px' }}
-          >
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#FFFFFF' }}>Create New Poll</h2>
-
-            {/* Poll Type Selector */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Poll Type</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                {[
-                  { id: 'multiple_choice', label: 'Multiple Choice' },
-                  { id: 'word_cloud', label: 'Word Cloud' },
-                  { id: 'rating', label: 'Rating (1-5)' },
-                  { id: 'quiz', label: 'Quiz Battle' },
-                  { id: 'open_text', label: 'Open Text' },
-                ].map(t => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setNewPollType(t.id as PollType)}
-                    style={{
-                      padding: '10px 8px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: newPollType === t.id ? 'var(--primary)' : 'rgba(255, 255, 255, 0.05)',
-                      border: `1px solid ${newPollType === t.id ? 'var(--primary)' : 'var(--border-subtle)'}`,
-                      color: '#FFFFFF',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {t.label}
-                  </button>
-                ))}
+              <div className="flex justify-end gap-2 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCreatePollModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-[#181F1C] bg-white hover:bg-[#F5F4EE] rounded-lg border border-[#D0CEC4] transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 text-xs font-semibold text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg cursor-pointer transition-colors"
+                >
+                  Create &amp; Launch
+                </button>
               </div>
-            </div>
+            </form>
+          </div>
+        )}
 
-            {/* Title */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Question or Prompt</label>
-              <input
-                type="text"
-                required
-                value={newPollTitle}
-                onChange={e => setNewPollTitle(e.target.value)}
-                placeholder="e.g. Which initiative should we prioritize?"
-                style={{
-                  padding: '12px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-light)',
-                  color: '#FFFFFF',
-                  fontSize: '0.95rem',
-                }}
-              />
-            </div>
+        {/* QR Code Modal */}
+        <QRCodeModal
+          pin={room.pin}
+          isOpen={showQRModal}
+          onClose={() => setShowQRModal(false)}
+          title={room.title}
+        />
 
-            {/* Options list for MCQ and Quiz */}
-            {(newPollType === 'multiple_choice' || newPollType === 'quiz') && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                    Choices {newPollType === 'quiz' && '(Select checkmark for correct answer)'}
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleAddOption}
-                    style={{ fontSize: '0.8rem', color: 'var(--secondary)', fontWeight: 600 }}
-                  >
-                    + Add Choice
-                  </button>
-                </div>
+        {/* AI Quiz & Poll Generator Modal */}
+        <AIGeneratorModal
+          isOpen={showAIGeneratorModal}
+          onClose={() => setShowAIGeneratorModal(false)}
+          onQuestionsGenerated={handleAIGeneratedQuestions}
+        />
 
-                {newPollOptions.map((opt, idx) => (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {newPollType === 'quiz' && (
-                      <button
-                        type="button"
-                        onClick={() => handleOptionCorrectToggle(idx)}
-                        style={{
-                          padding: '6px',
-                          color: opt.isCorrect ? 'var(--success)' : 'var(--text-dim)',
-                        }}
-                        title={opt.isCorrect ? 'Correct Option' : 'Mark as Correct'}
-                      >
-                        <CheckCircle2 size={20} />
-                      </button>
-                    )}
-
-                    <input
-                      type="text"
-                      required
-                      value={opt.text}
-                      onChange={e => handleOptionChange(idx, e.target.value)}
-                      placeholder={`Choice ${idx + 1}`}
-                      style={{
-                        flex: 1,
-                        padding: '10px 14px',
-                        borderRadius: 'var(--radius-sm)',
-                        background: 'var(--bg-input)',
-                        border: '1px solid var(--border-light)',
-                        color: '#FFFFFF',
-                        fontSize: '0.9rem',
-                      }}
-                    />
-
-                    {newPollOptions.length > 2 && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveOption(idx)}
-                        style={{ color: 'var(--text-dim)', padding: '6px' }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-              <button
-                type="button"
-                onClick={() => setShowCreatePollModal(false)}
-                className="secondary-btn"
-                style={{ padding: '10px 18px' }}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="glow-btn"
-                style={{ padding: '10px 22px' }}
-              >
-                Create & Launch
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* QR Code Modal */}
-      <QRCodeModal
-        pin={room.pin}
-        isOpen={showQRModal}
-        onClose={() => setShowQRModal(false)}
-        title={room.title}
-      />
-
-      {/* AI Quiz & Poll Generator Modal */}
-      <AIGeneratorModal
-        isOpen={showAIGeneratorModal}
-        onClose={() => setShowAIGeneratorModal(false)}
-        onQuestionsGenerated={handleAIGeneratedQuestions}
-      />
+        {/* Footer */}
+        <footer className="py-4 px-6 border-t border-[#D5D4CB]/60 text-xs text-[#5F665E] text-center"> {/* taste-skill-ignore */}
+          <span>surv. host command center &bull; Real-time session management</span>
+        </footer>
+      </div>
     </div>
   );
 }
 
 export default function HostRoomPage(props: HostRoomPageProps) {
   return (
-    <React.Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>Loading session...</div>}>
+    <React.Suspense fallback={<div className="min-h-[100svh] flex items-center justify-center text-[#5F665E]">Loading session command center...</div>}>
       <HostRoomContent {...props} />
     </React.Suspense>
   );
 }
-

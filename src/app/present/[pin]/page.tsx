@@ -175,186 +175,137 @@ function PresenterContent({ params }: PresenterPageProps) {
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
     } else {
-      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+      document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
     }
   };
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#05070A' }}>
-        <Sparkles size={40} color="var(--secondary)" style={{ animation: 'pulse-ring 1.5s infinite' }} />
+      <div className="min-h-[100svh] bg-[#15261F] text-[#E6E5DC] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <Sparkles className="w-8 h-8 text-[#c6f19d] mx-auto animate-spin" />
+          <p className="text-sm font-medium text-[#E6E5DC]/70">Initializing stage screen...</p>
+        </div>
       </div>
     );
   }
 
   if (!room) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#05070A' }}>
-        <div className="glass-panel" style={{ padding: '36px', textAlign: 'center' }}>
-          <h2 style={{ color: '#FFFFFF', marginBottom: '8px' }}>Session Not Found</h2>
-          <button onClick={() => router.push('/')} className="glow-btn">
-            Return to Home
-          </button>
+      <div className="min-h-[100svh] bg-[#283E34] p-4 text-[#181F1C] flex items-center justify-center">
+        <div className="w-full max-w-md p-8 rounded-2xl bg-[#E6E5DC] text-center space-y-4">
+          <h2 className="text-2xl font-semibold text-[#181F1C]">Session Not Found</h2>
+          <p className="text-sm text-[#5F665E]">
+            We could not find an active stage screen for PIN <strong className="text-[#181F1C]">{rawPin}</strong>.
+          </p>
+          <div className="flex gap-2 justify-center pt-2">
+            <button
+              onClick={() => router.push('/present')}
+              className="px-4 py-2 text-xs font-semibold text-[#181F1C] bg-white border border-[#D0CEC4] rounded-lg transition-colors cursor-pointer"
+            >
+              Stage Directory
+            </button>
+            <button
+              onClick={() => router.push('/host')}
+              className="px-4 py-2 text-xs font-semibold text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg transition-colors cursor-pointer"
+            >
+              Host Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{
-      minHeight: '100svh',
-      display: 'flex',
-      flexDirection: 'column',
-      background: '#070A10',
-      color: '#FFFFFF',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
+    <div className="min-h-[100svh] flex flex-col bg-[#15261F] text-[#E6E5DC] relative overflow-hidden select-none">
       {/* Top Projector Banner: Joining Instructions */}
-      <header style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '16px 36px',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        background: '#0D121B',
-        zIndex: 30,
-      }}>
-        {/* Left: Branding & Room Title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <header className="px-6 sm:px-12 py-4 border-b border-[#2D4A3E] bg-[#1D3228] flex items-center justify-between gap-4 z-30"> {/* taste-skill-ignore */}
+        {/* Left: Host Link & Title */}
+        <div className="flex items-center gap-3">
           <button
             onClick={() => router.push(`/host/${room.pin}`)}
-            style={{ color: 'var(--text-dim)', padding: '6px' }}
+            className="p-2 text-[#E6E5DC]/60 hover:text-white rounded-lg hover:bg-[#233B31] transition-colors cursor-pointer"
             title="Open Host Controls"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.01em' }}>
+            <h1 className="text-base sm:text-lg font-bold text-[#E6E5DC] leading-snug">
               {room.title}
             </h1>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Interactive Presenter Mode
+            <span className="text-xs text-[#c6f19d] font-medium">
+              Live Stage Screen
             </span>
           </div>
         </div>
 
         {/* Center: Prominent Join Instructions */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          background: 'rgba(255, 255, 255, 0.05)',
-          padding: '8px 24px',
-          borderRadius: 'var(--radius-full)',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-        }}>
-          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            Join at <strong style={{ color: '#FFFFFF' }}>surv.app</strong>
+        <div className="flex items-center gap-3 bg-[#15261F] border border-[#2D4A3E] px-5 py-2 rounded-full">
+          <span className="text-xs sm:text-sm text-[#E6E5DC]/80 font-medium">
+            Join at <strong className="text-white">surv.app</strong>
           </span>
-          <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border-light)' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.85rem', color: '#10B981', fontWeight: 600 }}>PIN:</span>
-            <span style={{
-              fontSize: '1.4rem',
-              fontWeight: 900,
-              fontVariantNumeric: 'tabular-nums',
-              letterSpacing: '0.08em',
-              color: '#FFFFFF',
-            }}>
+          <span className="w-1 h-1 rounded-full bg-[#c6f19d]" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-[#c6f19d] font-semibold">PIN:</span>
+            <span className="text-base sm:text-xl font-bold tabular-nums text-white">
               {room.pin}
             </span>
           </div>
 
           <button
             onClick={() => setShowQRModal(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-full)',
-              background: 'rgba(6, 182, 212, 0.15)',
-              color: 'var(--secondary)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              marginLeft: '4px',
-            }}
+            className="ml-2 px-3 py-1 rounded-full bg-[#233B31] hover:bg-[#2D4A3E] text-[#c6f19d] border border-[#2D4A3E] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <QrCode size={15} /> Show QR
+            <QrCode size={13} />
+            <span>Show QR</span>
           </button>
         </div>
 
         {/* Right: Attendee Counter & Fullscreen */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '6px 14px',
-            borderRadius: 'var(--radius-full)',
-            background: 'rgba(16, 185, 129, 0.12)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            color: 'var(--success)',
-            fontSize: '0.85rem',
-            fontWeight: 700,
-          }}>
-            <span className="badge-pulse" />
-            <Users size={16} />
-            <span>{responses.length > 0 ? `${responses.length} Voted` : `${room.participantCount} Live`}</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#15261F] border border-[#2D4A3E] text-xs font-semibold text-[#c6f19d]">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <Users size={14} />
+            <span className="tabular-nums">
+              {responses.length > 0 ? `${responses.length} voted` : `${room.participantCount} live`}
+            </span>
           </div>
 
           <button
             onClick={toggleFullscreen}
-            style={{
-              padding: '8px',
-              borderRadius: 'var(--radius-sm)',
-              background: 'rgba(255, 255, 255, 0.05)',
-              color: 'var(--text-muted)',
-            }}
+            className="p-2 rounded-lg text-[#E6E5DC]/60 hover:text-white bg-[#15261F] hover:bg-[#233B31] border border-[#2D4A3E] transition-colors cursor-pointer"
             title="Toggle Fullscreen (F)"
           >
-            {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>
         </div>
       </header>
 
-      {/* Main Stage */}
-      <main style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '40px 60px 100px',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        width: '100%',
-      }}>
+      {/* Main Stage Area */}
+      <main className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 pb-28 max-w-6xl mx-auto w-full">
         {activePoll ? (
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            {/* Poll Status Pill & Poll Progress */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span className="badge" style={{
-                  background: 'rgba(99, 102, 241, 0.15)',
-                  color: 'var(--primary)',
-                  fontSize: '0.85rem',
-                  border: '1px solid rgba(99, 102, 241, 0.3)',
-                }}>
+          <div className="w-full space-y-6">
+            {/* Poll Status Pill & Index */}
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2.5">
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#233B31] text-[#c6f19d] border border-[#2D4A3E] tabular-nums">
                   Poll {currentPollIndex + 1} of {polls.length}
                 </span>
 
                 {activePoll.isOpen ? (
-                  <span className="badge badge-live" style={{ fontSize: '0.85rem' }}>
-                    <span className="badge-pulse" /> Live Voting Active
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-emerald-300 bg-emerald-950/60 border border-emerald-800/40">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span>Live voting open</span>
                   </span>
                 ) : (
-                  <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.15)', color: 'var(--danger)', fontSize: '0.85rem' }}>
-                    <Lock size={13} /> Voting Closed
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-rose-300 bg-rose-950/60 border border-rose-800/40">
+                    <Lock size={12} />
+                    <span>Voting concluded</span>
                   </span>
                 )}
               </div>
@@ -362,34 +313,21 @@ function PresenterContent({ params }: PresenterPageProps) {
               {activePoll.type === 'quiz' && (
                 <button
                   onClick={() => setShowQuizLeaderboard(!showQuizLeaderboard)}
-                  className="secondary-btn"
-                  style={{
-                    padding: '6px 14px',
-                    fontSize: '0.85rem',
-                    background: showQuizLeaderboard ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                    borderColor: showQuizLeaderboard ? 'var(--warning)' : 'var(--border-light)',
-                    color: showQuizLeaderboard ? 'var(--warning)' : '#FFFFFF',
-                  }}
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#13231d] bg-[#c6f19d] hover:bg-[#b5e886] flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Award size={16} /> {showQuizLeaderboard ? 'Show Quiz Options' : 'Show Podium Leaderboard'}
+                  <Award size={15} />
+                  <span>{showQuizLeaderboard ? 'Show Options' : 'Show Podium Leaderboard'}</span>
                 </button>
               )}
             </div>
 
             {/* Question Heading */}
-            <h2 style={{
-              fontSize: 'clamp(1.8rem, 3.8vw, 3rem)',
-              fontWeight: 800,
-              color: '#FFFFFF',
-              textAlign: 'center',
-              lineHeight: 1.25,
-              textShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
-            }}>
+            <h2 className="text-3xl sm:text-5xl font-bold text-center text-[#E6E5DC] leading-tight max-w-4xl mx-auto">
               {activePoll.title}
             </h2>
 
-            {/* Dynamic Visualization Arena */}
-            <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
+            {/* Dynamic Visualizer Arena */}
+            <div className="w-full max-w-4xl mx-auto pt-4">
               {showQuizLeaderboard && activePoll.type === 'quiz' ? (
                 <QuizLeaderboard poll={activePoll} responses={responses} />
               ) : activePoll.type === 'multiple_choice' || activePoll.type === 'quiz' ? (
@@ -399,26 +337,18 @@ function PresenterContent({ params }: PresenterPageProps) {
               ) : activePoll.type === 'rating' ? (
                 <RatingVisualizer responses={responses} />
               ) : (
-                /* Open feedback answers stream */
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                  {responses.map((resp, i) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {responses.map(resp => (
                     <div
                       key={resp.id}
-                      className="glass-panel"
-                      style={{
-                        padding: '18px',
-                        fontSize: '1rem',
-                        lineHeight: 1.5,
-                        background: 'rgba(255, 255, 255, 0.03)',
-                        animation: `fadeIn 0.3s ease-out backwards ${i * 0.05}s`,
-                      }}
+                      className="p-4 rounded-xl bg-[#1D3228] border border-[#2D4A3E] text-sm text-[#E6E5DC] leading-relaxed"
                     >
                       &quot;{String(resp.value)}&quot;
                     </div>
                   ))}
                   {responses.length === 0 && (
-                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--text-muted)', padding: '40px' }}>
-                      Waiting for open responses from the audience...
+                    <div className="col-span-full py-16 text-center text-xs text-[#E6E5DC]/50">
+                      Waiting for audience feedback to stream in...
                     </div>
                   )}
                 </div>
@@ -427,41 +357,25 @@ function PresenterContent({ params }: PresenterPageProps) {
           </div>
         ) : (
           /* Welcome Splash Stage when no poll is active */
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            gap: '24px',
-            maxWidth: '680px',
-          }}>
-            <div style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '24px',
-              background: '#121720',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <Sparkles size={40} color="#FFFFFF" />
+          <div className="flex flex-col items-center text-center space-y-6 max-w-xl mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-[#1D3228] border border-[#2D4A3E] flex items-center justify-center text-[#c6f19d]">
+              <Sparkles size={32} />
             </div>
 
-            <h2 style={{ fontSize: '2.8rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.02em' }}>
-              Welcome to the Live Session
+            <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#E6E5DC]">
+              Welcome to the Session
             </h2>
 
-            <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-              Grab your phone or open a browser tab to participate in interactive polls, ask questions, and share your voice in real time.
+            <p className="text-base text-[#E6E5DC]/70 leading-relaxed">
+              Grab your phone or laptop and navigate to <strong className="text-white">surv.app</strong> with PIN <strong className="text-[#c6f19d] tabular-nums">{room.pin}</strong> to participate in live polls and interactive Q&amp;A.
             </p>
 
             <button
               onClick={() => setShowQRModal(true)}
-              className="glow-btn"
-              style={{ padding: '16px 32px', fontSize: '1.1rem', marginTop: '12px' }}
+              className="px-6 py-3.5 text-sm font-semibold text-[#13231d] bg-[#c6f19d] hover:bg-[#b5e886] rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
             >
-              <QrCode size={22} /> Display Fullscreen Join QR Code
+              <QrCode size={18} />
+              <span>Display Fullscreen Join QR Code</span>
             </button>
           </div>
         )}
@@ -469,41 +383,15 @@ function PresenterContent({ params }: PresenterPageProps) {
 
       {/* Featured Pinned Question Ticker at Bottom */}
       {pinnedQA && (
-        <aside style={{
-          position: 'fixed',
-          bottom: '84px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '90%',
-          maxWidth: '850px',
-          background: '#161E2C',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
-          padding: '16px 24px',
-          borderRadius: 'var(--radius-lg)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          zIndex: 40,
-          animation: 'fadeIn 0.3s ease-out',
-        }}>
-          <div style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <Pin size={18} color="#FFFFFF" />
+        <aside className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-[#1D3228] border border-[#2D4A3E] p-4 rounded-2xl flex items-center gap-3.5 z-40">
+          <div className="w-9 h-9 rounded-full bg-[#233B31] flex items-center justify-center shrink-0 text-[#c6f19d]">
+            <Pin size={16} />
           </div>
-
-          <div style={{ flex: 1 }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255, 255, 255, 0.8)' }}>
-              FEATURED AUDIENCE QUESTION • {pinnedQA.authorName} ({pinnedQA.upvotes} UPVOTES)
+          <div className="flex-1 min-w-0">
+            <span className="text-[10px] font-semibold text-[#c6f19d] block">
+              Featured Audience Question &bull; {pinnedQA.authorName} ({pinnedQA.upvotes} upvotes)
             </span>
-            <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#FFFFFF', marginTop: '2px' }}>
+            <p className="text-sm font-bold text-white truncate">
               &quot;{pinnedQA.text}&quot;
             </p>
           </div>
@@ -511,48 +399,33 @@ function PresenterContent({ params }: PresenterPageProps) {
       )}
 
       {/* Floating Presenter Control Dock (Auto-hides on idle) */}
-      <footer style={{
-        position: 'fixed',
-        bottom: '20px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'rgba(18, 24, 38, 0.92)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.12)',
-        borderRadius: 'var(--radius-full)',
-        padding: '8px 18px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        zIndex: 50,
-        boxShadow: 'var(--shadow-lg)',
-        opacity: controlsVisible ? 1 : 0.15,
-        transition: 'opacity 0.3s ease',
-      }}>
+      <footer
+        className={`fixed bottom-5 left-1/2 -translate-x-1/2 bg-[#1D3228] border border-[#2D4A3E] rounded-full px-4 py-2 flex items-center gap-2.5 z-50 transition-opacity duration-300 ${
+          controlsVisible ? 'opacity-100' : 'opacity-20 hover:opacity-100'
+        }`}
+      >
         {/* Previous Poll */}
         <button
           onClick={handlePrevPoll}
-          style={{ padding: '8px', borderRadius: '50%', color: 'var(--text-main)', background: 'rgba(255, 255, 255, 0.05)' }}
+          className="p-2 rounded-full text-[#E6E5DC]/70 hover:text-white bg-[#15261F] hover:bg-[#233B31] transition-colors cursor-pointer"
           title="Previous Poll (Left Arrow)"
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={18} />
         </button>
 
         {/* Voting Toggle */}
         {activePoll && (
           <button
             onClick={toggleVotingOpen}
-            className="secondary-btn"
-            style={{
-              padding: '6px 14px',
-              fontSize: '0.85rem',
-              color: activePoll.isOpen ? 'var(--danger)' : 'var(--success)',
-              borderColor: activePoll.isOpen ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)',
-            }}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+              activePoll.isOpen
+                ? 'bg-rose-950/60 text-rose-300 border border-rose-800/40'
+                : 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/40'
+            }`}
             title="Toggle Voting (C)"
           >
-            {activePoll.isOpen ? <Lock size={15} /> : <LockOpen size={15} />}
-            {activePoll.isOpen ? 'Close Voting' : 'Open Voting'}
+            {activePoll.isOpen ? <Lock size={13} /> : <LockOpen size={13} />}
+            <span>{activePoll.isOpen ? 'Close Voting' : 'Open Voting'}</span>
           </button>
         )}
 
@@ -560,12 +433,11 @@ function PresenterContent({ params }: PresenterPageProps) {
         {activePoll && (
           <button
             onClick={toggleResultsReveal}
-            className="secondary-btn"
-            style={{ padding: '6px 14px', fontSize: '0.85rem' }}
+            className="px-3 py-1.5 rounded-full text-xs font-semibold text-[#E6E5DC] bg-[#15261F] hover:bg-[#233B31] border border-[#2D4A3E] flex items-center gap-1.5 transition-colors cursor-pointer"
             title="Reveal / Hide Results (R)"
           >
-            {activePoll.showResults ? <EyeOff size={15} /> : <Eye size={15} />}
-            {activePoll.showResults ? 'Hide Results' : 'Show Results'}
+            {activePoll.showResults ? <EyeOff size={13} /> : <Eye size={13} />}
+            <span>{activePoll.showResults ? 'Hide Results' : 'Show Results'}</span>
           </button>
         )}
 
@@ -573,25 +445,20 @@ function PresenterContent({ params }: PresenterPageProps) {
         {activePoll && (activePoll.type === 'quiz' || activePoll.type === 'multiple_choice') && (
           <button
             onClick={toggleShowCorrect}
-            className="secondary-btn"
-            style={{
-              padding: '6px 14px',
-              fontSize: '0.85rem',
-              color: activePoll.showCorrect ? 'var(--success)' : 'var(--text-main)',
-            }}
+            className="px-3 py-1.5 rounded-full text-xs font-semibold text-[#E6E5DC] bg-[#15261F] hover:bg-[#233B31] border border-[#2D4A3E] flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <CheckCircle size={15} />
-            {activePoll.showCorrect ? 'Hide Correct' : 'Show Correct'}
+            <CheckCircle size={13} />
+            <span>{activePoll.showCorrect ? 'Hide Correct' : 'Show Correct'}</span>
           </button>
         )}
 
         {/* Next Poll */}
         <button
           onClick={handleNextPoll}
-          style={{ padding: '8px', borderRadius: '50%', color: 'var(--text-main)', background: 'rgba(255, 255, 255, 0.05)' }}
+          className="p-2 rounded-full text-[#E6E5DC]/70 hover:text-white bg-[#15261F] hover:bg-[#233B31] transition-colors cursor-pointer"
           title="Next Poll (Right Arrow / Space)"
         >
-          <ChevronRight size={20} />
+          <ChevronRight size={18} />
         </button>
       </footer>
 
@@ -608,9 +475,8 @@ function PresenterContent({ params }: PresenterPageProps) {
 
 export default function PresenterPage(props: PresenterPageProps) {
   return (
-    <React.Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#05070A', color: 'var(--text-muted)' }}>Loading presentation...</div>}>
+    <React.Suspense fallback={<div className="min-h-[100svh] bg-[#15261F] text-[#E6E5DC] flex items-center justify-center">Loading presentation...</div>}>
       <PresenterContent {...props} />
     </React.Suspense>
   );
 }
-

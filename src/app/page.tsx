@@ -15,7 +15,7 @@ import {
   Radio,
   Menu,
 } from 'lucide-react';
-import { initializeStore } from '@/lib/store';
+import { initializeStore, createRoom } from '@/lib/store';
 
 // Live interactive hero poll options
 interface HeroOption {
@@ -212,7 +212,12 @@ export default function HomePage() {
   };
 
   const handleLaunchSession = () => {
-    router.push('/host');
+    const tType = createMode === 'quiz' ? 'quiz' : createMode === 'qa' ? 'townhall' : 'blank';
+    const newRoom = createRoom({
+      title: createTitle.trim() || 'Interactive Keynote Session',
+      template: tType,
+    });
+    router.push(`/host/${newRoom.pin}`);
   };
 
   const totalHeroVotes = heroVotes.reduce((acc, curr) => acc + curr.votes, 0);
@@ -266,7 +271,7 @@ export default function HomePage() {
           {/* Navbar Action Buttons */}
           <div className="flex items-center gap-3">
             <button
-              onClick={() => router.push('/present/123-456-789')}
+              onClick={() => router.push('/present')}
               className="px-4 py-2 text-sm font-medium text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg transition-colors cursor-pointer"
             >
               Stage Screen
@@ -976,13 +981,13 @@ export default function HomePage() {
               </span>
               <span
                 className="hover:text-[#181F1C] cursor-pointer transition-colors"
-                onClick={() => router.push('/present/123-456-789')}
+                onClick={() => router.push('/present')}
               >
                 Stage Screen
               </span>
               <span
                 className="hover:text-[#181F1C] cursor-pointer transition-colors"
-                onClick={() => router.push('/app/123-456-789')}
+                onClick={() => router.push('/app')}
               >
                 Participant View
               </span>
