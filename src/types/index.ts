@@ -103,6 +103,7 @@ export interface LeaderboardEntry {
 
 export type RealtimeEvent =
   | { type: 'ROOM_UPDATED'; room: Room }
+  | { type: 'ROOM_DELETED'; roomId: string }
   | { type: 'ACTIVE_POLL_CHANGED'; pollId: string | null }
   | { type: 'POLL_STATE_CHANGED'; poll: Poll }
   | { type: 'POLL_CREATED'; poll: Poll }

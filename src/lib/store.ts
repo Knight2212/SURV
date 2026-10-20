@@ -5,217 +5,13 @@ import { supabase, isSupabaseConfigured } from './supabase';
 
 const STORAGE_KEY_PREFIX = 'surv_vevox_';
 const BROADCAST_CHANNEL_NAME = 'surv_sync_channel';
-
-// Initial preloaded demo session to ensure a delightful first-run experience
-const DEFAULT_DEMO_ROOM: Room = {
-  id: 'room-demo-101',
-  pin: '123-456-789',
-  title: 'Global Tech Summit 2026: Future of AI & Innovation',
-  description: 'Welcome to our interactive live session! Participate via polls, submit questions, and test your knowledge.',
-  status: 'active',
-  activePollId: 'poll-mcq-1',
-  activeSurveyId: 'survey-feedback-1',
-  allowAnonymousQA: true,
-  requireParticipantName: false,
-  participantCount: 42,
-  createdAt: new Date().toISOString(),
-};
-
-const DEFAULT_DEMO_POLLS: Poll[] = [
-  {
-    id: 'poll-mcq-1',
-    roomId: 'room-demo-101',
-    title: 'Which AI breakthrough will have the biggest societal impact by 2030?',
-    type: 'multiple_choice',
-    options: [
-      { id: 'opt-1', text: 'Autonomous Agents & Personal AI Assistants', color: '#6366F1' },
-      { id: 'opt-2', text: 'AI-driven Drug Discovery & Healthcare', color: '#10B981' },
-      { id: 'opt-3', text: 'Humanoid Robotics in Everyday Logistics', color: '#06B6D4' },
-      { id: 'opt-4', text: 'Quantum-AI Computing Hybrids', color: '#F59E0B' },
-      { id: 'opt-5', text: 'Synthetic Media & Creative Generation', color: '#EC4899' },
-    ],
-    isOpen: true,
-    showResults: true,
-    showCorrect: false,
-    order: 0,
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-  },
-  {
-    id: 'poll-wordcloud-2',
-    roomId: 'room-demo-101',
-    title: 'In ONE word, how would you describe the current pace of tech innovation?',
-    type: 'word_cloud',
-    options: [],
-    isOpen: true,
-    showResults: true,
-    order: 1,
-    createdAt: new Date(Date.now() - 3000000).toISOString(),
-  },
-  {
-    id: 'poll-rating-3',
-    roomId: 'room-demo-101',
-    title: 'How prepared does your team feel for adopting autonomous agentic workflows?',
-    type: 'rating',
-    options: [],
-    isOpen: true,
-    showResults: true,
-    order: 2,
-    createdAt: new Date(Date.now() - 2400000).toISOString(),
-  },
-  {
-    id: 'poll-quiz-4',
-    roomId: 'room-demo-101',
-    title: 'Speed Quiz: What is the primary difference between Generative AI and Agentic AI?',
-    type: 'quiz',
-    options: [
-      { id: 'quiz-opt-1', text: 'Agentic AI acts autonomously with goal-directed reasoning & tools', isCorrect: true, color: '#10B981' },
-      { id: 'quiz-opt-2', text: 'Agentic AI only summarizes text files', isCorrect: false, color: '#EF4444' },
-      { id: 'quiz-opt-3', text: 'There is zero technical difference', isCorrect: false, color: '#64748B' },
-      { id: 'quiz-opt-4', text: 'Agentic AI cannot access external databases', isCorrect: false, color: '#F59E0B' },
-    ],
-    isOpen: true,
-    showResults: true,
-    showCorrect: true,
-    timeLimit: 30,
-    order: 3,
-    createdAt: new Date(Date.now() - 1800000).toISOString(),
-  },
-  {
-    id: 'poll-open-5',
-    roomId: 'room-demo-101',
-    title: 'What burning challenge should keynote speakers address in today’s townhall?',
-    type: 'open_text',
-    options: [],
-    isOpen: true,
-    showResults: true,
-    order: 4,
-    createdAt: new Date(Date.now() - 1200000).toISOString(),
-  },
-];
-
-const DEFAULT_DEMO_RESPONSES: PollResponse[] = [
-  // Responses for MCQ-1
-  { id: 'r1', pollId: 'poll-mcq-1', roomId: 'room-demo-101', participantId: 'p1', value: 'opt-1', createdAt: new Date().toISOString() },
-  { id: 'r2', pollId: 'poll-mcq-1', roomId: 'room-demo-101', participantId: 'p2', value: 'opt-1', createdAt: new Date().toISOString() },
-  { id: 'r3', pollId: 'poll-mcq-1', roomId: 'room-demo-101', participantId: 'p3', value: 'opt-1', createdAt: new Date().toISOString() },
-  { id: 'r4', pollId: 'poll-mcq-1', roomId: 'room-demo-101', participantId: 'p4', value: 'opt-2', createdAt: new Date().toISOString() },
-  { id: 'r5', pollId: 'poll-mcq-1', roomId: 'room-demo-101', participantId: 'p5', value: 'opt-2', createdAt: new Date().toISOString() },
-  { id: 'r6', pollId: 'poll-mcq-1', roomId: 'room-demo-101', participantId: 'p6', value: 'opt-3', createdAt: new Date().toISOString() },
-  { id: 'r7', pollId: 'poll-mcq-1', roomId: 'room-demo-101', participantId: 'p7', value: 'opt-4', createdAt: new Date().toISOString() },
-
-  // Word Cloud responses
-  { id: 'r8', pollId: 'poll-wordcloud-2', roomId: 'room-demo-101', participantId: 'p1', value: 'Exponential', createdAt: new Date().toISOString() },
-  { id: 'r9', pollId: 'poll-wordcloud-2', roomId: 'room-demo-101', participantId: 'p2', value: 'Exponential', createdAt: new Date().toISOString() },
-  { id: 'r10', pollId: 'poll-wordcloud-2', roomId: 'room-demo-101', participantId: 'p3', value: 'Exponential', createdAt: new Date().toISOString() },
-  { id: 'r11', pollId: 'poll-wordcloud-2', roomId: 'room-demo-101', participantId: 'p4', value: 'Exhilarating', createdAt: new Date().toISOString() },
-  { id: 'r12', pollId: 'poll-wordcloud-2', roomId: 'room-demo-101', participantId: 'p5', value: 'Exhilarating', createdAt: new Date().toISOString() },
-  { id: 'r13', pollId: 'poll-wordcloud-2', roomId: 'room-demo-101', participantId: 'p6', value: 'Overwhelming', createdAt: new Date().toISOString() },
-  { id: 'r14', pollId: 'poll-wordcloud-2', roomId: 'room-demo-101', participantId: 'p7', value: 'Inspiring', createdAt: new Date().toISOString() },
-  { id: 'r15', pollId: 'poll-wordcloud-2', roomId: 'room-demo-101', participantId: 'p8', value: 'Transformative', createdAt: new Date().toISOString() },
-  { id: 'r16', pollId: 'poll-wordcloud-2', roomId: 'room-demo-101', participantId: 'p9', value: 'Transformative', createdAt: new Date().toISOString() },
-  { id: 'r17', pollId: 'poll-wordcloud-2', roomId: 'room-demo-101', participantId: 'p10', value: 'Relentless', createdAt: new Date().toISOString() },
-
-  // Rating responses (1 to 5)
-  { id: 'r18', pollId: 'poll-rating-3', roomId: 'room-demo-101', participantId: 'p1', value: 4, createdAt: new Date().toISOString() },
-  { id: 'r19', pollId: 'poll-rating-3', roomId: 'room-demo-101', participantId: 'p2', value: 5, createdAt: new Date().toISOString() },
-  { id: 'r20', pollId: 'poll-rating-3', roomId: 'room-demo-101', participantId: 'p3', value: 4, createdAt: new Date().toISOString() },
-  { id: 'r21', pollId: 'poll-rating-3', roomId: 'room-demo-101', participantId: 'p4', value: 3, createdAt: new Date().toISOString() },
-  { id: 'r22', pollId: 'poll-rating-3', roomId: 'room-demo-101', participantId: 'p5', value: 4, createdAt: new Date().toISOString() },
-
-  // Quiz responses
-  { id: 'r23', pollId: 'poll-quiz-4', roomId: 'room-demo-101', participantId: 'p1', participantName: 'Alex Rivera', value: 'quiz-opt-1', createdAt: new Date().toISOString() },
-  { id: 'r24', pollId: 'poll-quiz-4', roomId: 'room-demo-101', participantId: 'p2', participantName: 'Sarah Jenkins', value: 'quiz-opt-1', createdAt: new Date().toISOString() },
-  { id: 'r25', pollId: 'poll-quiz-4', roomId: 'room-demo-101', participantId: 'p3', participantName: 'Dr. Marcus Chen', value: 'quiz-opt-1', createdAt: new Date().toISOString() },
-  { id: 'r26', pollId: 'poll-quiz-4', roomId: 'room-demo-101', participantId: 'p4', participantName: 'Elena Rostova', value: 'quiz-opt-2', createdAt: new Date().toISOString() },
-];
-
-const DEFAULT_DEMO_QA: QAQuestion[] = [
-  {
-    id: 'qa-1',
-    roomId: 'room-demo-101',
-    participantId: 'p-guest-1',
-    authorName: 'Dr. Aris Thorne',
-    isAnonymous: false,
-    text: 'How will agentic security guardrails prevent hallucinated API executions in enterprise deployment?',
-    upvotes: 28,
-    upvotedBy: ['p1', 'p2', 'p3'],
-    isAnswered: false,
-    isPinned: true,
-    createdAt: new Date(Date.now() - 1500000).toISOString(),
-  },
-  {
-    id: 'qa-2',
-    roomId: 'room-demo-101',
-    participantId: 'p-guest-2',
-    authorName: 'Anonymous',
-    isAnonymous: true,
-    text: 'Can small engineering teams achieve real ROI with autonomous coding agents without multi-million dollar infra?',
-    upvotes: 19,
-    upvotedBy: ['p4', 'p5'],
-    isAnswered: false,
-    isPinned: false,
-    createdAt: new Date(Date.now() - 1200000).toISOString(),
-  },
-  {
-    id: 'qa-3',
-    roomId: 'room-demo-101',
-    participantId: 'p-guest-3',
-    authorName: 'Devon Lee',
-    isAnonymous: false,
-    text: 'Are there slides or live benchmarks comparing open-weights reasoning models vs frontier cloud models?',
-    upvotes: 12,
-    upvotedBy: ['p6'],
-    isAnswered: true,
-    isPinned: false,
-    createdAt: new Date(Date.now() - 800000).toISOString(),
-  },
-];
-
-const DEFAULT_DEMO_SURVEY: Survey = {
-  id: 'survey-feedback-1',
-  roomId: 'room-demo-101',
-  title: 'Summit Feedback & Future Topic Requests',
-  description: 'Help us shape upcoming quarterly sessions by sharing your quick thoughts.',
-  isOpen: true,
-  questions: [
-    {
-      id: 'sq-1',
-      title: 'Overall satisfaction with this interactive keynote session',
-      type: 'rating',
-      required: true,
-    },
-    {
-      id: 'sq-2',
-      title: 'Which deep-dive workshop would you attend next month?',
-      type: 'choice',
-      options: ['Building Multi-Agent Workflows', 'Local LLM Fine-Tuning & Quantization', 'Enterprise AGI Governance', 'Full-stack AI App Architecture'],
-      required: true,
-    },
-    {
-      id: 'sq-3',
-      title: 'Any suggestions or shoutouts for the presentation team?',
-      type: 'open_text',
-      required: false,
-    },
-  ],
-  createdAt: new Date(Date.now() - 7200000).toISOString(),
-};
+const PURGE_KEY = 'surv_demo_purged_v2';
 
 // Singleton broadcast channel
 let broadcastChannel: BroadcastChannel | null = null;
 if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
   broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
 }
-
-// Memory fallback cache for SSR and speed
-const memoryStore = {
-  rooms: new Map<string, Room>(),
-  polls: new Map<string, Poll[]>(),
-  responses: new Map<string, PollResponse[]>(),
-  qa: new Map<string, QAQuestion[]>(),
-  surveys: new Map<string, Survey[]>(),
-  surveyResponses: new Map<string, SurveyResponse[]>(),
-};
 
 // Helpers to read/write local storage safely
 function readLocal<T>(key: string, defaultValue: T): T {
@@ -238,30 +34,37 @@ function writeLocal<T>(key: string, data: T): void {
   }
 }
 
-// Ensure demo data is seeded
+// Initialize store and purge any legacy demo data from localStorage
 export function initializeStore(): void {
   if (typeof window === 'undefined') return;
 
-  const existingRooms = readLocal<Room[]>('rooms', []);
-  if (!existingRooms.some(r => r.pin === DEFAULT_DEMO_ROOM.pin)) {
-    existingRooms.push(DEFAULT_DEMO_ROOM);
-    writeLocal('rooms', existingRooms);
+  try {
+    if (!localStorage.getItem(PURGE_KEY)) {
+      // Clean out any legacy demo sessions & fake responses
+      const existingRooms = readLocal<Room[]>('rooms', []);
+      const cleanRooms = existingRooms.filter(r => !r.id.startsWith('room-demo-') && r.pin !== '123-456-789');
+      writeLocal('rooms', cleanRooms);
 
-    // Seed demo polls
-    const existingPolls = readLocal<Poll[]>('polls', []);
-    writeLocal('polls', [...existingPolls, ...DEFAULT_DEMO_POLLS]);
+      const existingPolls = readLocal<Poll[]>('polls', []);
+      const cleanPolls = existingPolls.filter(p => !p.roomId.startsWith('room-demo-') && !p.id.startsWith('poll-mcq-') && !p.id.startsWith('poll-wordcloud-') && !p.id.startsWith('poll-rating-') && !p.id.startsWith('poll-quiz-') && !p.id.startsWith('poll-open-') && !p.id.startsWith('poll-ah-') && !p.id.startsWith('poll-trivia-'));
+      writeLocal('polls', cleanPolls);
 
-    // Seed demo responses
-    const existingResponses = readLocal<PollResponse[]>('responses', []);
-    writeLocal('responses', [...existingResponses, ...DEFAULT_DEMO_RESPONSES]);
+      const existingResponses = readLocal<PollResponse[]>('responses', []);
+      const cleanResponses = existingResponses.filter(r => !r.roomId.startsWith('room-demo-'));
+      writeLocal('responses', cleanResponses);
 
-    // Seed demo QA
-    const existingQA = readLocal<QAQuestion[]>('qa', []);
-    writeLocal('qa', [...existingQA, ...DEFAULT_DEMO_QA]);
+      const existingQA = readLocal<QAQuestion[]>('qa', []);
+      const cleanQA = existingQA.filter(q => !q.roomId.startsWith('room-demo-'));
+      writeLocal('qa', cleanQA);
 
-    // Seed demo Survey
-    const existingSurveys = readLocal<Survey[]>('surveys', []);
-    writeLocal('surveys', [...existingSurveys, DEFAULT_DEMO_SURVEY]);
+      const existingSurveys = readLocal<Survey[]>('surveys', []);
+      const cleanSurveys = existingSurveys.filter(s => !s.roomId.startsWith('room-demo-'));
+      writeLocal('surveys', cleanSurveys);
+
+      localStorage.setItem(PURGE_KEY, 'true');
+    }
+  } catch (e) {
+    console.warn('Store cleanup warning:', e);
   }
 }
 
@@ -329,7 +132,7 @@ export function subscribeToRealtime(callback: (event: RealtimeEvent) => void): (
 
 export function getRooms(): Room[] {
   initializeStore();
-  return readLocal<Room[]>('rooms', [DEFAULT_DEMO_ROOM]);
+  return readLocal<Room[]>('rooms', []);
 }
 
 export function getRoomByPin(pin: string): Room | null {
@@ -343,14 +146,20 @@ export function getRoomByPin(pin: string): Room | null {
   );
 }
 
-export function createRoom(data: { title: string; description?: string; customPin?: string }): Room {
+export function createRoom(data: {
+  title: string;
+  description?: string;
+  customPin?: string;
+  template?: 'blank' | 'townhall' | 'quiz' | 'workshop';
+}): Room {
   initializeStore();
   const rooms = getRooms();
   const randomPin = `${Math.floor(100 + Math.random() * 900)}-${Math.floor(100 + Math.random() * 900)}-${Math.floor(100 + Math.random() * 900)}`;
   const pin = data.customPin || randomPin;
+  const newRoomId = 'room-' + Date.now();
 
   const newRoom: Room = {
-    id: 'room-' + Date.now(),
+    id: newRoomId,
     pin,
     title: data.title,
     description: data.description || '',
@@ -358,9 +167,136 @@ export function createRoom(data: { title: string; description?: string; customPi
     activePollId: null,
     allowAnonymousQA: true,
     requireParticipantName: false,
-    participantCount: 1,
+    participantCount: 0,
     createdAt: new Date().toISOString(),
   };
+
+  // Seed template polls if requested (without any fake responses)
+  if (data.template && data.template !== 'blank') {
+    const templatePolls: Poll[] = [];
+    if (data.template === 'townhall') {
+      templatePolls.push(
+        {
+          id: `poll-${Date.now()}-1`,
+          roomId: newRoomId,
+          title: 'How satisfied are you with our current team direction & roadmap execution?',
+          type: 'rating',
+          options: [],
+          isOpen: true,
+          showResults: true,
+          order: 0,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: `poll-${Date.now()}-2`,
+          roomId: newRoomId,
+          title: 'In ONE word, what should our top priority be for next quarter?',
+          type: 'word_cloud',
+          options: [],
+          isOpen: false,
+          showResults: true,
+          order: 1,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: `poll-${Date.now()}-3`,
+          roomId: newRoomId,
+          title: 'Which initiative will drive the highest impact for our audience?',
+          type: 'multiple_choice',
+          options: [
+            { id: 'opt-1', text: 'Core Reliability & Speed', color: '#2D4A3E' },
+            { id: 'opt-2', text: 'Interactive Features & Usability', color: '#10B981' },
+            { id: 'opt-3', text: 'Integrations & Open APIs', color: '#06B6D4' },
+            { id: 'opt-4', text: 'Security & Enterprise Support', color: '#F59E0B' },
+          ],
+          isOpen: false,
+          showResults: true,
+          order: 2,
+          createdAt: new Date().toISOString(),
+        }
+      );
+    } else if (data.template === 'quiz') {
+      templatePolls.push(
+        {
+          id: `poll-${Date.now()}-1`,
+          roomId: newRoomId,
+          title: 'Speed Trivia: In what year was JavaScript first released?',
+          type: 'quiz',
+          options: [
+            { id: 'q-1', text: '1995 (in 10 days)', isCorrect: true, color: '#10B981' },
+            { id: 'q-2', text: '1991', isCorrect: false, color: '#EF4444' },
+            { id: 'q-3', text: '1998', isCorrect: false, color: '#64748B' },
+            { id: 'q-4', text: '2001', isCorrect: false, color: '#F59E0B' },
+          ],
+          isOpen: true,
+          showResults: true,
+          showCorrect: true,
+          timeLimit: 20,
+          order: 0,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: `poll-${Date.now()}-2`,
+          roomId: newRoomId,
+          title: 'Which protocol enables bidirectional real-time communication with lowest overhead?',
+          type: 'quiz',
+          options: [
+            { id: 'q2-1', text: 'WebSockets (RFC 6455)', isCorrect: true, color: '#10B981' },
+            { id: 'q2-2', text: 'HTTP Long-Polling', isCorrect: false, color: '#EF4444' },
+            { id: 'q2-3', text: 'Periodic Fetch XMLHttp', isCorrect: false, color: '#F59E0B' },
+          ],
+          isOpen: false,
+          showResults: true,
+          showCorrect: true,
+          timeLimit: 25,
+          order: 1,
+          createdAt: new Date().toISOString(),
+        }
+      );
+    } else if (data.template === 'workshop') {
+      templatePolls.push(
+        {
+          id: `poll-${Date.now()}-1`,
+          roomId: newRoomId,
+          title: 'Pre-Flight Check: How confident do you feel applying these concepts?',
+          type: 'rating',
+          options: [],
+          isOpen: true,
+          showResults: true,
+          order: 0,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: `poll-${Date.now()}-2`,
+          roomId: newRoomId,
+          title: 'What specific challenge or question are you hoping to solve today?',
+          type: 'open_text',
+          options: [],
+          isOpen: false,
+          showResults: true,
+          order: 1,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: `poll-${Date.now()}-3`,
+          roomId: newRoomId,
+          title: 'In ONE word, describe your top takeaway from today:',
+          type: 'word_cloud',
+          options: [],
+          isOpen: false,
+          showResults: true,
+          order: 2,
+          createdAt: new Date().toISOString(),
+        }
+      );
+    }
+
+    if (templatePolls.length > 0) {
+      newRoom.activePollId = templatePolls[0].id;
+      const existingPolls = readLocal<Poll[]>('polls', []);
+      writeLocal('polls', [...existingPolls, ...templatePolls]);
+    }
+  }
 
   const updatedRooms = [newRoom, ...rooms];
   writeLocal('rooms', updatedRooms);
@@ -380,11 +316,130 @@ export function updateRoom(roomId: string, updates: Partial<Room>): Room | null 
   return updated;
 }
 
+export function deleteRoom(roomId: string): boolean {
+  const rooms = getRooms();
+  const filtered = rooms.filter(r => r.id !== roomId);
+  writeLocal('rooms', filtered);
+
+  // Clean up polls
+  const polls = readLocal<Poll[]>('polls', []);
+  const remainingPolls = polls.filter(p => p.roomId !== roomId);
+  writeLocal('polls', remainingPolls);
+
+  // Clean up responses
+  const responses = readLocal<PollResponse[]>('responses', []);
+  const remainingResponses = responses.filter(r => r.roomId !== roomId);
+  writeLocal('responses', remainingResponses);
+
+  // Clean up QA
+  const qa = readLocal<QAQuestion[]>('qa', []);
+  const remainingQA = qa.filter(q => q.roomId !== roomId);
+  writeLocal('qa', remainingQA);
+
+  // Clean up surveys
+  const surveys = readLocal<Survey[]>('surveys', []);
+  const remainingSurveys = surveys.filter(s => s.roomId !== roomId);
+  writeLocal('surveys', remainingSurveys);
+
+  emitRealtimeEvent({ type: 'ROOM_DELETED', roomId });
+  return true;
+}
+
+export function duplicateRoom(roomId: string): Room | null {
+  const rooms = getRooms();
+  const room = rooms.find(r => r.id === roomId);
+  if (!room) return null;
+
+  const newId = 'room-' + Date.now();
+  const randomPin = `${Math.floor(100 + Math.random() * 900)}-${Math.floor(100 + Math.random() * 900)}-${Math.floor(100 + Math.random() * 900)}`;
+
+  const newRoom: Room = {
+    ...room,
+    id: newId,
+    pin: randomPin,
+    title: `${room.title} (Copy)`,
+    participantCount: 0,
+    status: 'paused',
+    activePollId: null,
+    createdAt: new Date().toISOString(),
+  };
+
+  const updatedRooms = [newRoom, ...rooms];
+  writeLocal('rooms', updatedRooms);
+
+  // Duplicate polls for this room (without copying historical responses)
+  const existingPolls = readLocal<Poll[]>('polls', []);
+  const roomPolls = existingPolls.filter(p => p.roomId === roomId);
+  const duplicatedPolls: Poll[] = roomPolls.map((poll, idx) => ({
+    ...poll,
+    id: `poll-dup-${Date.now()}-${idx}`,
+    roomId: newId,
+    isOpen: false,
+    createdAt: new Date().toISOString(),
+  }));
+
+  if (duplicatedPolls.length > 0) {
+    newRoom.activePollId = duplicatedPolls[0].id;
+    writeLocal('polls', [...existingPolls, ...duplicatedPolls]);
+  }
+
+  emitRealtimeEvent({ type: 'ROOM_UPDATED', room: newRoom });
+  return newRoom;
+}
+
+export function getDashboardMetrics() {
+  initializeStore();
+  const rooms = getRooms();
+  const polls = readLocal<Poll[]>('polls', []);
+  const responses = readLocal<PollResponse[]>('responses', []);
+  const qa = readLocal<QAQuestion[]>('qa', []);
+
+  const activeRooms = rooms.filter(r => r.status === 'active').length;
+  const pausedRooms = rooms.filter(r => r.status === 'paused').length;
+  const endedRooms = rooms.filter(r => r.status === 'ended').length;
+  const totalParticipants = rooms.reduce((acc, r) => acc + (r.participantCount || 0), 0);
+
+  return {
+    totalRooms: rooms.length,
+    activeRooms,
+    pausedRooms,
+    endedRooms,
+    totalParticipants,
+    totalPolls: polls.length,
+    totalResponses: responses.length,
+    totalQA: qa.length,
+  };
+}
+
+export function exportRoomData(roomId: string) {
+  const room = getRooms().find(r => r.id === roomId);
+  if (!room) return null;
+
+  const polls = getPollsForRoom(roomId);
+  const pollsWithResponses = polls.map(p => ({
+    ...p,
+    responses: getResponsesForPoll(p.id),
+  }));
+  const qa = getQAQuestions(roomId);
+  const surveys = getSurveysForRoom(roomId).map(s => ({
+    ...s,
+    responses: getSurveyResponses(s.id),
+  }));
+
+  return {
+    room,
+    polls: pollsWithResponses,
+    qaQuestions: qa,
+    surveys,
+    exportedAt: new Date().toISOString(),
+  };
+}
+
 // ----------------- POLLS API -----------------
 
 export function getPollsForRoom(roomId: string): Poll[] {
   initializeStore();
-  const allPolls = readLocal<Poll[]>('polls', DEFAULT_DEMO_POLLS);
+  const allPolls = readLocal<Poll[]>('polls', []);
   return allPolls
     .filter(p => p.roomId === roomId)
     .sort((a, b) => a.order - b.order);
@@ -392,13 +447,13 @@ export function getPollsForRoom(roomId: string): Poll[] {
 
 export function getPollById(pollId: string): Poll | null {
   initializeStore();
-  const allPolls = readLocal<Poll[]>('polls', DEFAULT_DEMO_POLLS);
+  const allPolls = readLocal<Poll[]>('polls', []);
   return allPolls.find(p => p.id === pollId) || null;
 }
 
 export function createPoll(pollData: Omit<Poll, 'id' | 'createdAt' | 'order'>): Poll {
   initializeStore();
-  const allPolls = readLocal<Poll[]>('polls', DEFAULT_DEMO_POLLS);
+  const allPolls = readLocal<Poll[]>('polls', []);
   const roomPolls = allPolls.filter(p => p.roomId === pollData.roomId);
 
   const newPoll: Poll = {
@@ -415,7 +470,7 @@ export function createPoll(pollData: Omit<Poll, 'id' | 'createdAt' | 'order'>): 
 }
 
 export function updatePoll(pollId: string, updates: Partial<Poll>): Poll | null {
-  const allPolls = readLocal<Poll[]>('polls', DEFAULT_DEMO_POLLS);
+  const allPolls = readLocal<Poll[]>('polls', []);
   const idx = allPolls.findIndex(p => p.id === pollId);
   if (idx === -1) return null;
 
@@ -427,7 +482,7 @@ export function updatePoll(pollId: string, updates: Partial<Poll>): Poll | null 
 }
 
 export function deletePoll(pollId: string): void {
-  const allPolls = readLocal<Poll[]>('polls', DEFAULT_DEMO_POLLS);
+  const allPolls = readLocal<Poll[]>('polls', []);
   const filtered = allPolls.filter(p => p.id !== pollId);
   writeLocal('polls', filtered);
   emitRealtimeEvent({ type: 'POLL_DELETED', pollId });
@@ -437,7 +492,7 @@ export function deletePoll(pollId: string): void {
 
 export function getResponsesForPoll(pollId: string): PollResponse[] {
   initializeStore();
-  const allResponses = readLocal<PollResponse[]>('responses', DEFAULT_DEMO_RESPONSES);
+  const allResponses = readLocal<PollResponse[]>('responses', []);
   return allResponses.filter(r => r.pollId === pollId);
 }
 
@@ -449,7 +504,7 @@ export function submitPollResponse(data: {
   value: string | string[] | number;
 }): PollResponse {
   initializeStore();
-  const allResponses = readLocal<PollResponse[]>('responses', DEFAULT_DEMO_RESPONSES);
+  const allResponses = readLocal<PollResponse[]>('responses', []);
 
   // For single-choice or rating, update existing response from same participant
   const existingIdx = allResponses.findIndex(
@@ -480,7 +535,7 @@ export function submitPollResponse(data: {
 }
 
 export function resetPollResponses(pollId: string): void {
-  const allResponses = readLocal<PollResponse[]>('responses', DEFAULT_DEMO_RESPONSES);
+  const allResponses = readLocal<PollResponse[]>('responses', []);
   const remaining = allResponses.filter(r => r.pollId !== pollId);
   writeLocal('responses', remaining);
   emitRealtimeEvent({ type: 'POLL_RESET', pollId });
@@ -490,7 +545,7 @@ export function resetPollResponses(pollId: string): void {
 
 export function getQAQuestions(roomId: string): QAQuestion[] {
   initializeStore();
-  const allQA = readLocal<QAQuestion[]>('qa', DEFAULT_DEMO_QA);
+  const allQA = readLocal<QAQuestion[]>('qa', []);
   return allQA
     .filter(q => q.roomId === roomId)
     .sort((a, b) => {
@@ -509,7 +564,7 @@ export function addQAQuestion(data: {
   text: string;
 }): QAQuestion {
   initializeStore();
-  const allQA = readLocal<QAQuestion[]>('qa', DEFAULT_DEMO_QA);
+  const allQA = readLocal<QAQuestion[]>('qa', []);
 
   const question: QAQuestion = {
     id: 'qa-' + Date.now(),
@@ -532,7 +587,7 @@ export function addQAQuestion(data: {
 }
 
 export function toggleUpvoteQA(questionId: string, participantId: string): QAQuestion | null {
-  const allQA = readLocal<QAQuestion[]>('qa', DEFAULT_DEMO_QA);
+  const allQA = readLocal<QAQuestion[]>('qa', []);
   const idx = allQA.findIndex(q => q.id === questionId);
   if (idx === -1) return null;
 
@@ -561,7 +616,7 @@ export function toggleUpvoteQA(questionId: string, participantId: string): QAQue
 }
 
 export function updateQAQuestion(questionId: string, updates: Partial<QAQuestion>): QAQuestion | null {
-  const allQA = readLocal<QAQuestion[]>('qa', DEFAULT_DEMO_QA);
+  const allQA = readLocal<QAQuestion[]>('qa', []);
   const idx = allQA.findIndex(q => q.id === questionId);
   if (idx === -1) return null;
 
@@ -573,7 +628,7 @@ export function updateQAQuestion(questionId: string, updates: Partial<QAQuestion
 }
 
 export function deleteQAQuestion(questionId: string): void {
-  const allQA = readLocal<QAQuestion[]>('qa', DEFAULT_DEMO_QA);
+  const allQA = readLocal<QAQuestion[]>('qa', []);
   const filtered = allQA.filter(q => q.id !== questionId);
   writeLocal('qa', filtered);
   emitRealtimeEvent({ type: 'QA_DELETED', questionId });
@@ -583,7 +638,7 @@ export function deleteQAQuestion(questionId: string): void {
 
 export function getSurveysForRoom(roomId: string): Survey[] {
   initializeStore();
-  const allSurveys = readLocal<Survey[]>('surveys', [DEFAULT_DEMO_SURVEY]);
+  const allSurveys = readLocal<Survey[]>('surveys', []);
   return allSurveys.filter(s => s.roomId === roomId);
 }
 
@@ -607,7 +662,8 @@ export function submitSurveyResponse(data: {
     submittedAt: new Date().toISOString(),
   };
 
-  writeLocal('survey_responses', [...allResponses, response]);
+  const updated = [...allResponses, response];
+  writeLocal('survey_responses', updated);
   emitRealtimeEvent({ type: 'SURVEY_RESPONSE_SUBMITTED', response });
   return response;
 }

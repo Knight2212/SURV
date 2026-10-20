@@ -31,7 +31,7 @@ import {
   RotateCcw,
   Trash2,
   Lock,
-  Unlock,
+  LockOpen,
   Eye,
   EyeOff,
   CheckCircle,
@@ -346,7 +346,7 @@ function HostRoomContent({ params }: HostRoomPageProps) {
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => window.open(`/present/${room.pin}`, '_blank')}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+            className="px-3.5 py-2 text-xs font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Monitor size={14} className="text-cyan-400" />
             <span className="hidden sm:inline">Presenter Screen</span>
@@ -354,7 +354,7 @@ function HostRoomContent({ params }: HostRoomPageProps) {
 
           <button
             onClick={() => window.open(`/app/${room.pin}`, '_blank')}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+            className="px-3.5 py-2 text-xs font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Smartphone size={14} className="text-emerald-400" />
             <span className="hidden sm:inline">Participant App</span>
@@ -520,7 +520,7 @@ function HostRoomContent({ params }: HostRoomPageProps) {
                         color: selectedPoll.isOpen ? 'var(--danger)' : 'var(--success)',
                       }}
                     >
-                      {selectedPoll.isOpen ? <Lock size={14} /> : <Unlock size={14} />}
+                      {selectedPoll.isOpen ? <Lock size={14} /> : <LockOpen size={14} />}
                       {selectedPoll.isOpen ? 'Close Voting' : 'Open Voting'}
                     </button>
 

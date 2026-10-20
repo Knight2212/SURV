@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Poll, PollResponse } from '@/types';
-import { Check, Send, Star, Clock, Lock, Sparkles, CheckCircle2, XCircle } from 'lucide-react';
+import { Check, Send, Star, Lock, Sparkles, CheckCircle2, XCircle, BarChart3, Cloud, Zap, FileText } from 'lucide-react';
 import BarChartVisualizer from './BarChartVisualizer';
 import WordCloudVisualizer from './WordCloudVisualizer';
 import RatingVisualizer from './RatingVisualizer';
@@ -84,48 +84,66 @@ export default function ActivePollCard({
 
   return (
     <motion.div
+      data-ui="true"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="p-6 sm:p-7 rounded-2xl bg-slate-900/60 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col gap-5"
+      className="p-6 sm:p-7 rounded-2xl bg-[#1D3228] border border-[#2D4A3E] flex flex-col gap-5 text-[#E6E5DC]"
     >
       {/* Header with Type & Status */}
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
-          {poll.type === 'multiple_choice'
-            ? '📊 Multiple Choice'
-            : poll.type === 'word_cloud'
-            ? '☁️ Word Cloud'
-            : poll.type === 'rating'
-            ? '⭐ Rating'
-            : poll.type === 'quiz'
-            ? '⚡ Gamified Quiz'
-            : '📝 Open Feedback'}
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#233B31] text-[#c6f19d]">
+          {poll.type === 'multiple_choice' ? (
+            <>
+              <BarChart3 size={13} className="text-[#c6f19d]" />
+              <span>Multiple Choice</span>
+            </>
+          ) : poll.type === 'word_cloud' ? (
+            <>
+              <Cloud size={13} className="text-[#c6f19d]" />
+              <span>Word Cloud</span>
+            </>
+          ) : poll.type === 'rating' ? (
+            <>
+              <Star size={13} className="text-[#c6f19d]" />
+              <span>Rating Scale</span>
+            </>
+          ) : poll.type === 'quiz' ? (
+            <>
+              <Zap size={13} className="text-[#c6f19d]" />
+              <span>Live Quiz</span>
+            </>
+          ) : (
+            <>
+              <FileText size={13} className="text-[#c6f19d]" />
+              <span>Open Feedback</span>
+            </>
+          )}
         </span>
 
         <div className="flex items-center gap-2">
           {poll.isOpen ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>Live Voting</span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-emerald-300 bg-emerald-950/60 border border-emerald-800/40">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>Live voting</span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-rose-300 bg-rose-500/15 border border-rose-500/30">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-rose-300 bg-rose-950/60 border border-rose-800/40">
               <Lock size={12} />
-              <span>Voting Closed</span>
+              <span>Voting closed</span>
             </span>
           )}
         </div>
       </div>
 
       {/* Question Title */}
-      <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-snug">
+      <h2 className="text-xl sm:text-2xl font-bold text-[#E6E5DC] leading-snug">
         {poll.title}
       </h2>
 
       {/* Voting Closed notice if applicable */}
       {!poll.isOpen && (
-        <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs sm:text-sm flex items-center gap-2">
+        <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-800/30 text-rose-300 text-xs sm:text-sm flex items-center gap-2">
           <Lock size={15} className="shrink-0" />
           <span>Voting has been concluded by the presenter.</span>
         </div>
@@ -146,24 +164,24 @@ export default function ActivePollCard({
                   key={opt.id}
                   disabled={!poll.isOpen}
                   onClick={() => handleOptionClick(opt.id)}
-                  className={`w-full flex items-center justify-between p-3.5 sm:p-4 rounded-xl border text-left transition-all ${
-                    poll.isOpen ? 'cursor-pointer hover:border-indigo-400/50' : 'cursor-default'
+                  className={`w-full flex items-center justify-between p-3.5 sm:p-4 rounded-xl border text-left transition-colors ${
+                    poll.isOpen ? 'cursor-pointer hover:border-[#c6f19d]/40' : 'cursor-default'
                   } ${
                     isCorrect
-                      ? 'bg-emerald-950/30 border-emerald-500 text-white shadow-md shadow-emerald-950/30'
+                      ? 'bg-emerald-950/60 border-emerald-500 text-white'
                       : isWrong
-                      ? 'bg-rose-950/30 border-rose-500 text-white'
+                      ? 'bg-rose-950/60 border-rose-500 text-white'
                       : isSelected
-                      ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-950/30'
-                      : 'bg-white/[0.03] border-white/10 text-slate-200 hover:bg-white/[0.06]'
+                      ? 'bg-[#28483B] border-[#c6f19d] text-white'
+                      : 'bg-[#15261F] border-[#2D4A3E] text-[#E6E5DC]/90 hover:bg-[#1D3228]'
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
                     <span
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 tabular-nums ${
                         isSelected
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-white/10 text-slate-300'
+                          ? 'bg-[#c6f19d] text-[#13231d]'
+                          : 'bg-[#233B31] text-[#E6E5DC]/70'
                       }`}
                     >
                       {OPTION_LETTERS[idx] || idx + 1}
@@ -178,7 +196,7 @@ export default function ActivePollCard({
                     <XCircle size={20} className="text-rose-400 shrink-0" />
                   )}
                   {isSelected && !poll.showCorrect && (
-                    <Check size={18} className="text-indigo-400 shrink-0" />
+                    <Check size={18} className="text-[#c6f19d] shrink-0" />
                   )}
                 </button>
               );
@@ -197,15 +215,15 @@ export default function ActivePollCard({
                 onChange={e => setWordInput(e.target.value)}
                 placeholder="Enter a single word or short phrase..."
                 maxLength={32}
-                className="flex-1 px-4 py-3 bg-slate-950/80 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                className="flex-1 px-4 py-3 bg-[#15261F] border border-[#2D4A3E] rounded-xl text-[#E6E5DC] placeholder-[#E6E5DC]/40 text-sm focus:outline-none focus:border-[#c6f19d] transition-colors"
               />
               <button
                 type="submit"
                 disabled={!poll.isOpen || !wordInput.trim()}
-                className="px-5 py-3 font-semibold text-xs text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:cursor-not-allowed shrink-0"
+                className="px-5 py-3 font-semibold text-xs text-[#13231d] bg-[#c6f19d] hover:bg-[#b5e886] disabled:opacity-50 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer disabled:cursor-not-allowed shrink-0"
               >
                 <Send size={15} />
-                <span>Submit</span>
+                <span>Send word</span>
               </button>
             </div>
             {submitted && (
@@ -228,24 +246,24 @@ export default function ActivePollCard({
                     type="button"
                     disabled={!poll.isOpen}
                     onClick={() => handleRatingClick(val)}
-                    className={`p-3 rounded-xl border transition-all ${
-                      poll.isOpen ? 'cursor-pointer hover:scale-110' : 'cursor-default'
+                    className={`p-3 rounded-xl border transition-colors ${
+                      poll.isOpen ? 'cursor-pointer hover:border-amber-400/50' : 'cursor-default'
                     } ${
                       isActive
-                        ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
-                        : 'bg-white/5 border-white/10 text-slate-600'
+                        ? 'bg-amber-950/40 border-amber-500/50 text-amber-400'
+                        : 'bg-[#15261F] border-[#2D4A3E] text-[#E6E5DC]/40'
                     }`}
                   >
                     <Star
                       size={28}
-                      className={isActive ? 'fill-amber-400 text-amber-400' : 'text-slate-600'}
+                      className={isActive ? 'fill-amber-400 text-amber-400' : 'text-[#E6E5DC]/30'}
                     />
                   </button>
                 );
               })}
             </div>
             {ratingInput > 0 && (
-              <span className="text-xs font-semibold text-amber-400">
+              <span className="text-xs font-semibold text-amber-400 tabular-nums">
                 You rated: {ratingInput} out of 5 stars
               </span>
             )}
@@ -261,16 +279,16 @@ export default function ActivePollCard({
               onChange={e => setOpenTextInput(e.target.value)}
               placeholder="Share your detailed feedback or comments here..."
               rows={4}
-              className="w-full px-4 py-3 bg-slate-950/80 border border-white/15 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none"
+              className="w-full px-4 py-3 bg-[#15261F] border border-[#2D4A3E] rounded-xl text-[#E6E5DC] placeholder-[#E6E5DC]/40 text-sm focus:outline-none focus:border-[#c6f19d] transition-colors resize-none"
             />
             <div className="flex justify-end">
               <button
                 type="submit"
                 disabled={!poll.isOpen || !openTextInput.trim()}
-                className="px-5 py-2.5 font-semibold text-xs text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:cursor-not-allowed"
+                className="px-5 py-2.5 font-semibold text-xs text-[#13231d] bg-[#c6f19d] hover:bg-[#b5e886] disabled:opacity-50 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 <Send size={14} />
-                <span>Submit Feedback</span>
+                <span>Share response</span>
               </button>
             </div>
           </form>
@@ -279,18 +297,18 @@ export default function ActivePollCard({
 
       {/* Voting status / confirmation banner */}
       {submitted && (
-        <div className="flex items-center gap-2 p-3 bg-emerald-500/15 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs font-semibold">
+        <div className="flex items-center gap-2 p-3 bg-emerald-950/40 border border-emerald-800/40 rounded-xl text-emerald-300 text-xs font-semibold">
           <Check size={16} />
-          <span>Response recorded!</span>
+          <span>Response recorded</span>
         </div>
       )}
 
       {/* Live Results Reveal Section (If Presenter enabled showResults) */}
       {poll.showResults && (
-        <div className="mt-3 pt-5 border-t border-white/10 flex flex-col gap-3.5">
-          <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider">
+        <div className="mt-3 pt-5 bg-[#15261F]/60 p-4 rounded-xl flex flex-col gap-3.5">
+          <div className="flex items-center gap-2 text-[#c6f19d] text-xs font-semibold">
             <Sparkles size={14} />
-            <span>Live Audience Results</span>
+            <span>Live audience results</span>
           </div>
 
           {poll.type === 'multiple_choice' || poll.type === 'quiz' ? (

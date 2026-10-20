@@ -13,12 +13,12 @@ interface BarChartVisualizerProps {
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const DEFAULT_COLORS = [
-  { bar: 'from-indigo-500/20 to-indigo-500/40', badge: 'bg-indigo-600', text: 'text-indigo-400', border: 'border-indigo-500/40' },
-  { bar: 'from-cyan-500/20 to-cyan-500/40', badge: 'bg-cyan-600', text: 'text-cyan-400', border: 'border-cyan-500/40' },
-  { bar: 'from-emerald-500/20 to-emerald-500/40', badge: 'bg-emerald-600', text: 'text-emerald-400', border: 'border-emerald-500/40' },
-  { bar: 'from-amber-500/20 to-amber-500/40', badge: 'bg-amber-600', text: 'text-amber-400', border: 'border-amber-500/40' },
-  { bar: 'from-rose-500/20 to-rose-500/40', badge: 'bg-rose-600', text: 'text-rose-400', border: 'border-rose-500/40' },
-  { bar: 'from-purple-500/20 to-purple-500/40', badge: 'bg-purple-600', text: 'text-purple-400', border: 'border-purple-500/40' },
+  { bar: 'bg-[#2D4A3E]', badge: 'bg-[#2D4A3E]', text: 'text-[#c6f19d]', border: 'border-[#3D6655]' },
+  { bar: 'bg-[#164e63]', badge: 'bg-[#0891b2]', text: 'text-[#22D3EE]', border: 'border-[#0891b2]/40' },
+  { bar: 'bg-[#064e3b]', badge: 'bg-[#059669]', text: 'text-[#34D399]', border: 'border-[#059669]/40' },
+  { bar: 'bg-[#78350f]', badge: 'bg-[#d97706]', text: 'text-[#FBBF24]', border: 'border-[#d97706]/40' },
+  { bar: 'bg-[#7c2d12]', badge: 'bg-[#EA580C]', text: 'text-[#fb923c]', border: 'border-[#EA580C]/40' },
+  { bar: 'bg-[#1f2937]', badge: 'bg-[#4b5563]', text: 'text-[#9ca3af]', border: 'border-[#4b5563]/40' },
 ];
 
 export default function BarChartVisualizer({ poll, responses, compact = false }: BarChartVisualizerProps) {
@@ -52,7 +52,7 @@ export default function BarChartVisualizer({ poll, responses, compact = false }:
   }, [options, responses]);
 
   return (
-    <div className={`flex flex-col w-full ${compact ? 'gap-2.5' : 'gap-4'}`}>
+    <div data-ui="true" className={`flex flex-col w-full ${compact ? 'gap-2.5' : 'gap-4'}`}>
       {options.map((opt, idx) => {
         const count = stats.counts[opt.id] || 0;
         const percentage = stats.totalResponses > 0 ? Math.round((count / stats.totalResponses) * 100) : 0;
@@ -65,26 +65,24 @@ export default function BarChartVisualizer({ poll, responses, compact = false }:
             key={opt.id}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: idx * 0.05 }}
-            className={`relative rounded-xl border overflow-hidden transition-all duration-300 ${
+            transition={{ duration: 0.2, delay: idx * 0.04 }}
+            className={`relative rounded-lg border overflow-hidden ${
               compact ? 'p-3' : 'p-4 sm:p-5'
             } ${
               isCorrect
-                ? 'bg-emerald-950/25 border-emerald-500/60 shadow-lg shadow-emerald-950/30 ring-1 ring-emerald-500/30'
+                ? 'bg-[#0f291e] border-emerald-500'
                 : isLeading
-                ? 'bg-slate-900/60 border-indigo-500/40 shadow-md shadow-indigo-950/20'
-                : 'bg-white/[0.03] border-white/10 hover:border-white/15'
+                ? 'bg-[#181F1C] border-[#c6f19d]/40'
+                : 'bg-[#181F1C] border-[#283E34] hover:border-[#3D6655]'
             }`}
           >
             {/* Animated Background Progress Fill */}
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${percentage}%` }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className={`absolute inset-y-0 left-0 z-0 bg-gradient-to-r ${
-                isCorrect
-                  ? 'from-emerald-500/20 to-emerald-500/35'
-                  : colorSet.bar
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className={`absolute inset-y-0 left-0 z-0 opacity-40 ${
+                isCorrect ? 'bg-emerald-600' : colorSet.bar
               }`}
             />
 
@@ -92,7 +90,7 @@ export default function BarChartVisualizer({ poll, responses, compact = false }:
             <div className="relative z-10 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3.5 flex-1 min-w-0">
                 <span
-                  className={`flex items-center justify-center font-bold text-white shrink-0 rounded-lg shadow-sm ${
+                  className={`flex items-center justify-center font-bold text-white shrink-0 rounded ${
                     compact ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'
                   } ${isCorrect ? 'bg-emerald-600' : colorSet.badge}`}
                 >
@@ -100,7 +98,7 @@ export default function BarChartVisualizer({ poll, responses, compact = false }:
                 </span>
 
                 <span
-                  className={`font-semibold text-slate-100 truncate ${
+                  className={`font-semibold text-white truncate ${
                     compact ? 'text-sm' : 'text-base sm:text-lg'
                   }`}
                 >
@@ -111,7 +109,7 @@ export default function BarChartVisualizer({ poll, responses, compact = false }:
                   <motion.span
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 shrink-0 ml-1"
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold text-emerald-300 bg-emerald-500/20 shrink-0 ml-1"
                   >
                     <CheckCircle2 size={13} className="text-emerald-400" />
                     <span>Correct</span>
@@ -119,8 +117,8 @@ export default function BarChartVisualizer({ poll, responses, compact = false }:
                 )}
 
                 {isLeading && !isCorrect && stats.totalResponses > 1 && (
-                  <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded-full border border-indigo-500/20">
-                    <Trophy size={11} className="text-indigo-400" /> Leading
+                  <span className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-[#c6f19d] bg-[#233B31] px-2 py-0.5 rounded">
+                    <Trophy size={11} className="text-[#c6f19d]" /> Leading
                   </span>
                 )}
               </div>
@@ -128,19 +126,19 @@ export default function BarChartVisualizer({ poll, responses, compact = false }:
               {/* Vote Stats */}
               <div className="flex items-baseline gap-2 shrink-0">
                 <span
-                  className={`font-extrabold font-mono tracking-tight ${
+                  className={`font-bold tabular-nums tracking-tight ${
                     compact ? 'text-base' : 'text-lg sm:text-2xl'
                   } ${
                     isCorrect
                       ? 'text-emerald-400'
                       : isLeading
                       ? 'text-white'
-                      : 'text-slate-300'
+                      : 'text-[#E6E5DC]'
                   }`}
                 >
                   {percentage}%
                 </span>
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-[#8C9188] tabular-nums">
                   ({count})
                 </span>
               </div>
@@ -150,19 +148,19 @@ export default function BarChartVisualizer({ poll, responses, compact = false }:
       })}
 
       {/* Footer Info */}
-      <div className="flex items-center justify-between px-1 text-xs text-slate-400 pt-1">
+      <div className="flex items-center justify-between px-1 text-xs text-[#8C9188] pt-1">
         <span className="flex items-center gap-1.5 font-medium">
-          <Users size={13} className="text-slate-500" />
+          <Users size={13} className="text-[#8C9188]" />
           <span>Total Responses:</span>
-          <strong className="text-white font-mono">{stats.totalResponses}</strong>
+          <strong className="text-white tabular-nums">{stats.totalResponses}</strong>
         </span>
         <span className="flex items-center gap-1.5">
           <span
             className={`w-2 h-2 rounded-full ${
-              poll.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'
+              poll.isOpen ? 'bg-emerald-400' : 'bg-slate-500'
             }`}
           />
-          <span className="font-medium text-slate-300">
+          <span className="font-medium text-[#E6E5DC]">
             {poll.isOpen ? 'Voting Open' : 'Voting Closed'}
           </span>
         </span>

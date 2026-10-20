@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QAQuestion } from '@/types';
-import { ThumbsUp, Pin, CheckCircle, Trash2, Send, Sparkles, Search, MessageSquare } from 'lucide-react';
+import { ThumbsUp, Pin, CheckCircle2, Trash2, Send, Sparkles, Search, MessageSquare, Flame, Clock3 } from 'lucide-react';
 
 interface LiveQAFeedProps {
   questions: QAQuestion[];
@@ -69,16 +69,16 @@ export default function LiveQAFeed({
   }, [questions, filter, searchQuery]);
 
   return (
-    <div className="flex flex-col gap-5 w-full">
+    <div data-ui="true" className="flex flex-col gap-5 w-full text-[#E6E5DC]">
       {/* Ask Question Input Box */}
       {onSubmitQuestion && (
         <form
           onSubmit={handleSubmit}
-          className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 backdrop-blur-md flex flex-col gap-3.5 shadow-xl"
+          className="p-5 rounded-2xl bg-[#1D3228] border border-[#2D4A3E] flex flex-col gap-3.5"
         >
-          <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-[#c6f19d] text-xs font-semibold">
             <Sparkles size={15} />
-            <span>Ask the Presenter</span>
+            <span>Ask the presenter</span>
           </div>
 
           <textarea
@@ -86,17 +86,17 @@ export default function LiveQAFeed({
             onChange={e => setNewQuestionText(e.target.value)}
             placeholder="Type your question or discussion point..."
             rows={2}
-            className="w-full bg-slate-950/80 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none"
+            className="w-full bg-[#15261F] border border-[#2D4A3E] rounded-xl px-4 py-3 text-sm text-[#E6E5DC] placeholder-[#E6E5DC]/40 focus:outline-none focus:border-[#c6f19d] transition-colors resize-none"
           />
 
           <div className="flex items-center justify-between pt-1">
             {allowAnonymous ? (
-              <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-400 hover:text-slate-300 select-none">
+              <label className="flex items-center gap-2 cursor-pointer text-xs text-[#E6E5DC]/70 hover:text-[#E6E5DC] select-none">
                 <input
                   type="checkbox"
                   checked={isAnonymous}
                   onChange={e => setIsAnonymous(e.target.checked)}
-                  className="rounded bg-slate-950 border-white/20 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                  className="rounded bg-[#15261F] border-[#2D4A3E] text-[#2D4A3E] focus:ring-[#c6f19d] w-4 h-4 cursor-pointer"
                 />
                 <span>Post anonymously</span>
               </label>
@@ -107,10 +107,10 @@ export default function LiveQAFeed({
             <button
               type="submit"
               disabled={!newQuestionText.trim() || submitting}
-              className="py-2.5 px-5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:cursor-not-allowed"
+              className="py-2.5 px-5 text-xs font-semibold text-[#13231d] bg-[#c6f19d] hover:bg-[#b5e886] disabled:opacity-50 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
               <Send size={14} />
-              <span>Send Question</span>
+              <span>Send question</span>
             </button>
           </div>
         </form>
@@ -119,31 +119,46 @@ export default function LiveQAFeed({
       {/* Filter and Search Bar */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         {/* Filter Pills */}
-        <div className="inline-flex bg-white/5 rounded-full p-1 border border-white/10">
+        <div className="inline-flex bg-[#1D3228] rounded-full p-1 border border-[#2D4A3E]">
           {(['top', 'recent', 'answered'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setFilter(tab)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
                 filter === tab
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#c6f19d] text-[#13231d]'
+                  : 'text-[#E6E5DC]/60 hover:text-[#E6E5DC]'
               }`}
             >
-              {tab === 'top' ? '🔥 Top Voted' : tab === 'recent' ? '⏱ Most Recent' : '✓ Answered'}
+              {tab === 'top' ? (
+                <>
+                  <Flame size={13} />
+                  <span>Top voted</span>
+                </>
+              ) : tab === 'recent' ? (
+                <>
+                  <Clock3 size={13} />
+                  <span>Most recent</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={13} />
+                  <span>Answered</span>
+                </>
+              )}
             </button>
           ))}
         </div>
 
         {/* Search */}
         <div className="relative flex items-center max-w-xs w-full sm:w-56">
-          <Search size={14} className="text-slate-500 absolute left-3 pointer-events-none" />
+          <Search size={14} className="text-[#E6E5DC]/40 absolute left-3 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search questions..."
-            className="w-full pl-9 pr-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+            className="w-full pl-9 pr-3.5 py-1.5 rounded-full bg-[#1D3228] border border-[#2D4A3E] text-xs text-[#E6E5DC] placeholder-[#E6E5DC]/40 focus:outline-none focus:border-[#c6f19d] transition-colors"
           />
         </div>
       </div>
@@ -151,10 +166,10 @@ export default function LiveQAFeed({
       {/* Questions List */}
       <div className="flex flex-col gap-3">
         {filteredQuestions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl bg-slate-900/30 border border-dashed border-white/10 text-slate-400">
-            <MessageSquare size={28} className="text-slate-500 mb-2" />
-            <p className="text-sm font-medium text-slate-300">No questions found</p>
-            <span className="text-xs text-slate-500 mt-1">
+          <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl bg-[#1D3228]/40 border border-dashed border-[#2D4A3E] text-[#E6E5DC]/60">
+            <MessageSquare size={28} className="text-[#E6E5DC]/40 mb-2" />
+            <p className="text-sm font-medium text-[#E6E5DC]">No questions found</p>
+            <span className="text-xs text-[#E6E5DC]/50 mt-1">
               Be the first to submit a question or clear search filters.
             </span>
           </div>
@@ -171,28 +186,28 @@ export default function LiveQAFeed({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.25 }}
-                  className={`flex items-start gap-4 p-4 sm:p-4.5 rounded-2xl border transition-all ${
+                  className={`flex items-start gap-4 p-4 sm:p-4.5 rounded-2xl border transition-colors ${
                     q.isPinned
-                      ? 'bg-gradient-to-r from-indigo-950/30 to-slate-900/70 border-indigo-500/50 shadow-lg shadow-indigo-950/20'
-                      : 'bg-slate-900/50 border-white/10 hover:border-white/15'
+                      ? 'bg-[#244237] border-[#c6f19d]/40'
+                      : 'bg-[#1D3228] border-[#2D4A3E] hover:border-[#3D6354]'
                   }`}
                 >
                   {/* Upvote Button */}
                   <motion.button
                     whileTap={{ scale: 0.88 }}
                     onClick={() => onUpvote(q.id)}
-                    className={`flex flex-col items-center justify-center min-w-11 px-2 py-2 rounded-xl border transition-all cursor-pointer ${
+                    className={`flex flex-col items-center justify-center min-w-11 px-2 py-2 rounded-xl border transition-colors cursor-pointer ${
                       hasUpvoted
-                        ? 'bg-indigo-600/25 border-indigo-500 text-indigo-400 shadow-sm shadow-indigo-600/30'
-                        : 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-400 hover:text-slate-200'
+                        ? 'bg-[#2D4A3E] border-[#c6f19d] text-[#c6f19d]'
+                        : 'bg-[#15261F] hover:bg-[#233B31] border-[#2D4A3E] text-[#E6E5DC]/60 hover:text-[#E6E5DC]'
                     }`}
                     title={hasUpvoted ? 'Remove upvote' : 'Upvote this question'}
                   >
                     <ThumbsUp
                       size={15}
-                      className={hasUpvoted ? 'fill-current text-indigo-400' : 'text-slate-400'}
+                      className={hasUpvoted ? 'fill-current text-[#c6f19d]' : 'text-[#E6E5DC]/50'}
                     />
-                    <span className="text-xs font-extrabold font-mono mt-1">
+                    <span className="text-xs font-bold tabular-nums mt-1">
                       {q.upvotes}
                     </span>
                   </motion.button>
@@ -200,49 +215,49 @@ export default function LiveQAFeed({
                   {/* Content */}
                   <div className="flex-1 flex flex-col gap-1.5 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold text-slate-200">
+                      <span className="text-xs font-bold text-[#E6E5DC]">
                         {q.authorName}
                       </span>
-                      <span className="text-[11px] text-slate-500">
+                      <span className="text-[11px] text-[#E6E5DC]/50 tabular-nums">
                         • {new Date(q.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
 
                       {q.isPinned && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                          <Pin size={10} /> PINNED
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#233B31] text-[#c6f19d] border border-[#2D4A3E]">
+                          <Pin size={10} /> Pinned
                         </span>
                       )}
 
                       {q.isAnswered && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                          <CheckCircle size={10} /> ANSWERED
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">
+                          <CheckCircle2 size={10} /> Answered
                         </span>
                       )}
                     </div>
 
-                    <p className="text-sm text-slate-100 leading-relaxed break-words">
+                    <p className="text-sm text-[#E6E5DC]/90 leading-relaxed break-words">
                       {q.text}
                     </p>
 
                     {/* Host Moderation Actions */}
                     {isHost && onModerate && (
-                      <div className="flex items-center gap-3 mt-1.5 pt-2 border-t border-white/5 text-xs text-slate-400">
+                      <div className="flex items-center gap-3 mt-1.5 pt-2 text-xs text-[#E6E5DC]/60 bg-[#15261F]/60 px-3 py-1.5 rounded-lg">
                         <button
                           onClick={() => onModerate(q.id, { isPinned: !q.isPinned })}
                           className={`flex items-center gap-1 hover:text-white transition-colors cursor-pointer ${
-                            q.isPinned ? 'text-indigo-400 font-semibold' : ''
+                            q.isPinned ? 'text-[#c6f19d] font-semibold' : ''
                           }`}
                         >
-                          <Pin size={12} /> {q.isPinned ? 'Unpin' : 'Pin to Screen'}
+                          <Pin size={12} /> {q.isPinned ? 'Unpin' : 'Pin to screen'}
                         </button>
 
                         <button
                           onClick={() => onModerate(q.id, { isAnswered: !q.isAnswered })}
                           className={`flex items-center gap-1 hover:text-white transition-colors cursor-pointer ${
-                            q.isAnswered ? 'text-emerald-400 font-semibold' : ''
+                            q.isAnswered ? 'text-emerald-300 font-semibold' : ''
                           }`}
                         >
-                          <CheckCircle size={12} /> {q.isAnswered ? 'Mark Unanswered' : 'Mark Answered'}
+                          <CheckCircle2 size={12} /> {q.isAnswered ? 'Mark unanswered' : 'Mark answered'}
                         </button>
 
                         {onDelete && (

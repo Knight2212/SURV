@@ -27,7 +27,7 @@ import {
   Eye,
   EyeOff,
   Lock,
-  Unlock,
+  LockOpen,
   CheckCircle,
   Pin,
   Sparkles,
@@ -551,7 +551,7 @@ function PresenterContent({ params }: PresenterPageProps) {
             }}
             title="Toggle Voting (C)"
           >
-            {activePoll.isOpen ? <Lock size={15} /> : <Unlock size={15} />}
+            {activePoll.isOpen ? <Lock size={15} /> : <LockOpen size={15} />}
             {activePoll.isOpen ? 'Close Voting' : 'Open Voting'}
           </button>
         )}

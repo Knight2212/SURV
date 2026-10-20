@@ -142,7 +142,7 @@ function generateFallbackQuestions(
           { text: 'Artificial Intelligence integration', isCorrect: isQuiz },
           { text: 'Sustainable practices adoption', isCorrect: false },
           { text: 'Global market expansion', isCorrect: false },
-          { text: 'Next-generation tooling', isCorrect: false },
+          { text: 'Modern developer tooling', isCorrect: false },
         ],
       },
       {
@@ -187,7 +187,7 @@ function generateFallbackQuestions(
       `Describe ${topic} in one powerful word.`,
       `What emotion does ${topic} evoke for you?`,
       `Name one breakthrough in ${topic} you're most excited about.`,
-      `In one word, what's the future of ${topic}?`,
+      `In one word, how would you describe tomorrow's ${topic}?`,
       `What single improvement would transform ${topic}?`,
     ];
     baseQuestions.push(

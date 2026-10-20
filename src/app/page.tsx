@@ -220,7 +220,7 @@ export default function HomePage() {
   return (
     <div className="min-h-[100svh] bg-[#283E34] p-2 sm:p-4 text-[#181F1C]">
       {/* Outer framing container matching the fintech template */}
-      <div className="bg-[#E6E5DC] rounded-2xl sm:rounded-3xl shadow-2xl min-h-[calc(100svh-1rem)] sm:min-h-[calc(100svh-2rem)] flex flex-col justify-between overflow-hidden">
+      <div className="bg-[#E6E5DC] rounded-2xl sm:rounded-3xl min-h-[calc(100svh-1rem)] sm:min-h-[calc(100svh-2rem)] flex flex-col justify-between overflow-hidden">
         
         {/* Top Navbar */}
         <header className="px-6 sm:px-10 py-5 flex items-center justify-between border-b border-[#D5D4CB]/60"> {/* taste-skill-ignore */}
@@ -230,8 +230,8 @@ export default function HomePage() {
               className="flex items-center gap-2 cursor-pointer bg-[#DFDDD3] hover:bg-[#D7D5CB] px-3 py-1.5 rounded-lg border border-[#D0CEC4] transition-colors"
               onClick={() => router.push('/')}
             >
-              <div className="w-5 h-5 rounded bg-[#181F1C] text-[#E6E5DC] flex items-center justify-center font-bold text-xs">
-                ✦
+              <div className="w-5 h-5 rounded bg-[#181F1C] text-[#E6E5DC] flex items-center justify-center">
+                <Sparkles size={12} />
               </div>
               <span className="text-base font-semibold tracking-tight text-[#181F1C]">
                 surv<span className="text-[#2D4A3E]">.</span>
@@ -267,13 +267,13 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push('/present/123-456-789')}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg transition-colors cursor-pointer shadow-sm"
+              className="px-4 py-2 text-sm font-medium text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg transition-colors cursor-pointer"
             >
               Stage Screen
             </button>
             <button
               onClick={() => router.push('/host')}
-              className="px-4 py-2 text-sm font-medium text-[#181F1C] bg-white hover:bg-[#F5F4EE] rounded-lg border border-[#D0CEC4] transition-colors cursor-pointer shadow-sm"
+              className="px-4 py-2 text-sm font-medium text-[#181F1C] bg-white hover:bg-[#F5F4EE] rounded-lg border border-[#D0CEC4] transition-colors cursor-pointer"
             >
               Start Session
             </button>
@@ -285,8 +285,8 @@ export default function HomePage() {
           {/* Trust Badge with Orange Checkbox from Template */}
           <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-[#181F1C] mb-6">
             <span className="text-[#5F665E]">Trusted by</span>
-            <span className="w-4 h-4 rounded bg-[#EA580C] text-white flex items-center justify-center text-[10px] font-bold">
-              ✓
+            <span className="w-4 h-4 rounded bg-[#EA580C] text-white flex items-center justify-center">
+              <Check size={11} strokeWidth={3} />
             </span>
             <span className="font-semibold text-[#181F1C]">4,000+ interactive sessions</span>
           </div>
@@ -306,7 +306,7 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
             <button
               onClick={() => router.push('/host')}
-              className="px-6 py-3.5 text-sm font-medium text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg shadow-sm cursor-pointer transition-colors"
+              className="px-6 py-3.5 text-sm font-medium text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg cursor-pointer transition-colors"
             >
               Start free session
             </button>
@@ -316,7 +316,7 @@ export default function HomePage() {
                 const el = document.getElementById('join-box');
                 el?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="px-6 py-3.5 text-sm font-medium text-[#181F1C] bg-white hover:bg-[#F5F4EE] rounded-lg border border-[#D0CEC4] shadow-sm cursor-pointer transition-colors"
+              className="px-6 py-3.5 text-sm font-medium text-[#181F1C] bg-white hover:bg-[#F5F4EE] rounded-lg border border-[#D0CEC4] cursor-pointer transition-colors"
             >
               Join with PIN
             </button>
@@ -353,9 +353,9 @@ export default function HomePage() {
           {/* Circuit Board Header with Satin Node */}
           <div className="relative mb-6 flex flex-col items-center">
             {/* Ambient Satin Center Node from Template */}
-            <div className="w-24 h-24 rounded-3xl bg-[#DFDDD3] border border-[#D0CEC4] shadow-lg flex items-center justify-center relative z-10">
-              <div className="text-2xl text-[#181F1C]">✦</div>
-              <div className="absolute -bottom-3 px-3 py-0.5 rounded-full bg-white border border-[#D0CEC4] text-[11px] font-medium text-[#181F1C] flex items-center gap-1.5 shadow-sm">
+            <div className="w-24 h-24 rounded-3xl bg-[#DFDDD3] border border-[#D0CEC4] flex items-center justify-center relative z-10">
+              <div className="text-[#181F1C]"><Sparkles size={28} /></div>
+              <div className="absolute -bottom-3 px-3 py-0.5 rounded-full bg-white border border-[#D0CEC4] text-[11px] font-medium text-[#181F1C] flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
                 <span>Auto-sync &bull; live</span>
               </div>
@@ -365,7 +365,7 @@ export default function HomePage() {
           {/* Dual-Screen Working Simulator */}
           <div
             data-ui
-            className="rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] shadow-md overflow-hidden"
+            className="rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] overflow-hidden"
           >
             {/* Simulator Header */}
             <div className="px-6 py-3.5 bg-[#D7D5CB] border-b border-[#D0CEC4] flex items-center justify-between"> {/* taste-skill-ignore */}
@@ -422,7 +422,7 @@ export default function HomePage() {
 
                         <div className="h-2.5 w-full rounded bg-[#D7D5CB] overflow-hidden">
                           <div
-                            className="h-full rounded bg-[#2D4A3E] transition-all duration-300 ease-out"
+                            className="h-full rounded bg-[#2D4A3E] transition-[width] duration-300 ease-out"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
@@ -458,7 +458,7 @@ export default function HomePage() {
                           onClick={() => handleHeroVote(opt.id)}
                           className={`w-full flex items-center justify-between p-3 rounded-lg border text-xs text-left transition-colors cursor-pointer ${
                             isSelected
-                              ? 'bg-white text-[#181F1C] border-[#2D4A3E] font-semibold shadow-sm'
+                              ? 'bg-white text-[#181F1C] border-[#2D4A3E] font-semibold'
                               : 'bg-[#E6E5DC] border-[#D0CEC4] text-[#181F1C] hover:bg-white'
                           }`}
                         >
@@ -514,7 +514,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div data-ui className="lg:col-span-7 p-6 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-6 shadow-sm">
+            <div data-ui className="lg:col-span-7 p-6 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-[#D0CEC4]"> {/* taste-skill-ignore */}
                 <span className="text-xs font-semibold text-[#181F1C]">
                   Live Cloud &amp; Rating Preview
@@ -527,7 +527,7 @@ export default function HomePage() {
                 {cloudWords.map((cw, idx) => (
                   <span
                     key={idx}
-                    className={`${cw.size} transition-all duration-300 hover:text-[#2D4A3E] cursor-default`}
+                    className={`${cw.size} transition-colors duration-200 hover:text-[#2D4A3E] cursor-default`}
                   >
                     {cw.text}
                   </span>
@@ -582,7 +582,7 @@ export default function HomePage() {
 
           {/* Capability 2: Live Anonymous Q&A Moderation */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div data-ui className="lg:col-span-7 p-6 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-4 shadow-sm">
+            <div data-ui className="lg:col-span-7 p-6 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-[#D0CEC4]"> {/* taste-skill-ignore */}
                 <span className="text-xs font-semibold text-[#181F1C]">
                   Live Q&amp;A Feed &bull; Top Questions First
@@ -594,7 +594,7 @@ export default function HomePage() {
                 {qaItems.map(item => (
                   <div
                     key={item.id}
-                    className="p-3.5 rounded-xl bg-white border border-[#D0CEC4] flex items-start justify-between gap-4 shadow-sm"
+                    className="p-3.5 rounded-xl bg-white border border-[#D0CEC4] flex items-start justify-between gap-4"
                   >
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-[#181F1C] leading-relaxed">
@@ -663,7 +663,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div data-ui className="lg:col-span-7 p-6 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-4 shadow-sm">
+            <div data-ui className="lg:col-span-7 p-6 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-[#D0CEC4]"> {/* taste-skill-ignore */}
                 <span className="text-xs font-semibold text-[#181F1C] flex items-center gap-1.5">
                   <Sparkles size={14} className="text-[#EA580C]" />
@@ -752,7 +752,7 @@ export default function HomePage() {
           </div>
 
           {/* Selected Environment Breakdown */}
-          <div className="p-8 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] grid grid-cols-1 md:grid-cols-12 gap-8 items-center shadow-sm">
+          <div className="p-8 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
             <div className="md:col-span-7 space-y-4">
               <span className="text-xs text-[#5F665E]">
                 Scope: {USE_CASES[activeUseCase].scope}
@@ -795,7 +795,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
             {/* SURV Card */}
-            <div className="p-8 rounded-2xl bg-white border-2 border-[#2D4A3E] flex flex-col justify-between shadow-sm">
+            <div className="p-8 rounded-2xl bg-white border-2 border-[#2D4A3E] flex flex-col justify-between">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-[#181F1C]">SURV Platform</span>
@@ -839,7 +839,7 @@ export default function HomePage() {
 
               <button
                 onClick={() => router.push('/host')}
-                className="mt-8 w-full py-3 text-xs font-semibold text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg transition-colors cursor-pointer shadow-sm"
+                className="mt-8 w-full py-3 text-xs font-semibold text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg transition-colors cursor-pointer"
               >
                 Start Free Session Now
               </button>
@@ -903,7 +903,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div data-ui className="lg:col-span-7 p-8 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-5 shadow-sm">
+            <div data-ui className="lg:col-span-7 p-8 rounded-2xl bg-[#DFDDD3] border border-[#D0CEC4] space-y-5">
               <span className="text-xs font-semibold text-[#181F1C] block">
                 Session Configuration
               </span>
@@ -936,7 +936,7 @@ export default function HomePage() {
                       onClick={() => setCreateMode(mode.id as any)}
                       className={`py-2 px-3 rounded-lg text-xs font-semibold transition-colors cursor-pointer text-center ${
                         createMode === mode.id
-                          ? 'bg-[#2D4A3E] text-white shadow-sm'
+                          ? 'bg-[#2D4A3E] text-white'
                           : 'bg-[#E6E5DC] text-[#181F1C] border border-[#D0CEC4] hover:bg-white'
                       }`}
                     >
@@ -949,7 +949,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={handleLaunchSession}
-                className="w-full py-3 text-xs font-semibold text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-sm"
+                className="w-full py-3 text-xs font-semibold text-white bg-[#2D4A3E] hover:bg-[#233B31] rounded-lg flex items-center justify-center gap-2 cursor-pointer transition-colors"
               >
                 <span>Launch Session Dashboard</span>
                 <ArrowRight size={14} />

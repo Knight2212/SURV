@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Copy, Check, QrCode, Sparkles } from 'lucide-react';
+import { X, Copy, Check, QrCode } from 'lucide-react';
 
 interface QRCodeModalProps {
   pin: string;
@@ -31,7 +31,7 @@ export default function QRCodeModal({
         width: 360,
         margin: 2,
         color: {
-          dark: '#07090E',
+          dark: '#181F1C',
           light: '#FFFFFF',
         },
       })
@@ -53,48 +53,49 @@ export default function QRCodeModal({
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl"
+        data-ui="true"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85"
         onClick={onClose}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.92, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.92, y: 15 }}
-          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-sm rounded-3xl bg-slate-900/90 border border-white/10 p-7 flex flex-col items-center text-center shadow-2xl overflow-hidden"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.15 }}
+          className="relative w-full max-w-sm rounded-2xl bg-[#181F1C] border border-[#283E34] p-7 flex flex-col items-center text-center overflow-hidden"
           onClick={e => e.stopPropagation()}
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+            className="absolute top-4 right-4 p-2 text-[#8C9188] hover:text-white rounded hover:bg-[#233B31] transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X size={18} />
           </button>
 
           {/* Icon Badge */}
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white flex items-center justify-center mb-3 shadow-lg shadow-indigo-600/30">
-            <QrCode size={24} />
+          <div className="w-11 h-11 rounded-lg bg-[#2D4A3E] text-[#c6f19d] flex items-center justify-center mb-3">
+            <QrCode size={22} />
           </div>
 
-          <h3 className="text-xl font-black text-white tracking-tight mb-1">
+          <h3 className="text-xl font-bold text-white tracking-tight mb-1">
             {title}
           </h3>
-          <p className="text-xs text-slate-400 mb-5 leading-relaxed">
+          <p className="text-xs text-[#8C9188] mb-5 leading-relaxed">
             Scan with any smartphone camera or navigate to the URL below
           </p>
 
           {/* High-Contrast QR Code Card */}
-          <div className="p-3.5 bg-white rounded-2xl shadow-xl shadow-black/40 mb-5 ring-4 ring-white/10">
+          <div className="p-3.5 bg-white rounded-xl mb-5">
             {qrDataUrl ? (
               <img
                 src={qrDataUrl}
                 alt={`Join QR code for PIN ${pin}`}
-                className="w-56 h-56 block rounded-xl"
+                className="w-56 h-56 block rounded"
               />
             ) : (
-              <div className="w-56 h-56 flex items-center justify-center text-slate-700 text-xs font-mono">
+              <div className="w-56 h-56 flex items-center justify-center text-slate-700 text-xs tabular-nums">
                 Generating QR code...
               </div>
             )}
@@ -102,10 +103,10 @@ export default function QRCodeModal({
 
           {/* PIN Display */}
           <div className="mb-5 space-y-0.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-semibold text-[#8C9188]">
               Session PIN
             </span>
-            <div className="text-2xl font-black font-mono tracking-widest text-cyan-400">
+            <div className="text-2xl font-bold tracking-widest text-[#c6f19d] tabular-nums">
               {pin}
             </div>
           </div>
@@ -113,16 +114,16 @@ export default function QRCodeModal({
           {/* 1-Click Copy Link */}
           <button
             onClick={handleCopy}
-            className={`w-full py-3 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+            className={`w-full py-3 px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 border transition-colors cursor-pointer ${
               copied
-                ? 'bg-emerald-600/20 text-emerald-300 border-emerald-500/40 shadow-md shadow-emerald-950/30'
-                : 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10 hover:border-white/20'
+                ? 'bg-[#2D4A3E] text-[#c6f19d] border-[#c6f19d]'
+                : 'bg-[#233B31] hover:bg-[#2D4A3E] text-[#E6E5DC] border-[#283E34]'
             }`}
           >
             {copied ? (
               <>
-                <Check size={16} className="text-emerald-400" />
-                <span>Link Copied to Clipboard!</span>
+                <Check size={16} className="text-[#c6f19d]" />
+                <span>Link Copied to Clipboard</span>
               </>
             ) : (
               <>

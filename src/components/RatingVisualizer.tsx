@@ -30,15 +30,15 @@ export default function RatingVisualizer({ responses, maxRating = 5 }: RatingVis
   }, [responses, maxRating]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 sm:gap-8 p-6 sm:p-8 rounded-2xl bg-slate-900/50 border border-white/10 backdrop-blur-md items-center">
+    <div data-ui="true" className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 sm:gap-8 p-6 sm:p-8 rounded-xl bg-[#181F1C] border border-[#283E34] items-center">
       {/* Big Average Score Card */}
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className="flex flex-col items-center justify-center p-6 rounded-xl bg-white/[0.03] border border-white/10 text-center shadow-lg"
+        transition={{ duration: 0.2 }}
+        className="flex flex-col items-center justify-center p-6 rounded-lg bg-[#233B31] border border-[#283E34] text-center"
       >
-        <span className="text-5xl sm:text-6xl font-black text-amber-400 font-mono tracking-tight leading-none drop-shadow-[0_0_24px_rgba(245,158,11,0.35)]">
+        <span className="text-5xl sm:text-6xl font-bold text-amber-400 tracking-tight leading-none tabular-nums">
           {stats.average}
         </span>
 
@@ -52,14 +52,14 @@ export default function RatingVisualizer({ responses, maxRating = 5 }: RatingVis
               <Star
                 key={star}
                 size={20}
-                className={isFilled || isHalf ? 'fill-amber-400 text-amber-400' : 'text-slate-600'}
+                className={isFilled || isHalf ? 'fill-amber-400 text-amber-400' : 'text-[#8C9188]'}
               />
             );
           })}
         </div>
 
-        <span className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
-          <Users size={12} className="text-slate-500" />
+        <span className="text-xs text-[#8C9188] flex items-center gap-1.5 font-medium">
+          <Users size={12} className="text-[#8C9188]" />
           <span>{stats.total} rating{stats.total === 1 ? '' : 's'}</span>
         </span>
       </motion.div>
@@ -72,24 +72,24 @@ export default function RatingVisualizer({ responses, maxRating = 5 }: RatingVis
 
           return (
             <div key={rating} className="flex items-center gap-3 text-xs">
-              <div className="flex items-center gap-1.5 w-10 font-bold text-slate-300">
+              <div className="flex items-center gap-1.5 w-10 font-bold text-[#E6E5DC]">
                 <span>{rating}</span>
                 <Star size={13} className="fill-amber-400 text-amber-400 shrink-0" />
               </div>
 
               {/* Progress Track */}
-              <div className="flex-1 h-3 rounded-full bg-white/10 overflow-hidden relative">
+              <div className="flex-1 h-3 rounded-full bg-[#233B31] overflow-hidden relative">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${percentage}%` }}
-                  transition={{ duration: 0.6, delay: idx * 0.05, ease: 'easeOut' }}
-                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400"
+                  transition={{ duration: 0.4, delay: idx * 0.04 }}
+                  className="h-full rounded-full bg-amber-400"
                 />
               </div>
 
-              <div className="w-16 text-right font-mono text-slate-400 font-medium shrink-0">
+              <div className="w-16 text-right tabular-nums text-[#8C9188] font-medium shrink-0">
                 <span>{percentage}%</span>
-                <span className="text-slate-500 ml-1">({count})</span>
+                <span className="text-[#8C9188] ml-1">({count})</span>
               </div>
             </div>
           );
