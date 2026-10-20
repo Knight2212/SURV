@@ -28,6 +28,7 @@ import WordCloudVisualizer from '@/components/WordCloudVisualizer';
 import RatingVisualizer from '@/components/RatingVisualizer';
 import QRCodeModal from '@/components/QRCodeModal';
 import AIGeneratorModal from '@/components/AIGeneratorModal';
+import ExportModal from '@/components/ExportModal';
 import {
   Plus,
   Play,
@@ -79,6 +80,7 @@ function HostRoomContent({ params }: HostRoomPageProps) {
   const [showAIGeneratorModal, setShowAIGeneratorModal] = useState(false);
   const [showCreateSurveyModal, setShowCreateSurveyModal] = useState(false);
   const [showHostQAModal, setShowHostQAModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [expandedSurveyId, setExpandedSurveyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -523,11 +525,12 @@ function HostRoomContent({ params }: HostRoomPageProps) {
             </button>
 
             <button
-              onClick={handleExportData}
-              className="p-2 text-[#181F1C] bg-white hover:bg-[#F5F4EE] border border-[#D0CEC4] rounded-lg transition-colors cursor-pointer"
-              title="Export Session Data"
+              onClick={() => setShowExportModal(true)}
+              className="px-3 py-2 text-xs font-semibold text-[#181F1C] bg-white hover:bg-[#F5F4EE] border border-[#D0CEC4] rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Export Session Data (Excel, CSV, JSON)"
             >
-              <Download size={16} />
+              <Download size={14} />
+              <span className="hidden sm:inline">Export</span>
             </button>
           </div>
         </header>
@@ -1394,6 +1397,27 @@ function HostRoomContent({ params }: HostRoomPageProps) {
           onClose={() => setShowAIGeneratorModal(false)}
           onQuestionsGenerated={handleAIGeneratedQuestions}
         />
+
+        {/* Session Data Export Modal (Excel, CSV, JSON) */}
+        {showExportModal && room && (
+          <ExportModal
+            isOpen={showExportModal}
+            onClose={() => setShowExportModal(false)}
+            data={{
+              room,
+              polls: polls.map(p => ({
+                ...p,
+                responses: getResponsesForPoll(p.id),
+              })),
+              qaQuestions: questions,
+              surveys: surveys.map(s => ({
+                ...s,
+                responses: getSurveyResponses(s.id),
+              })),
+              exportedAt: new Date().toISOString(),
+            }}
+          />
+        )}
 
         {/* Footer */}
         <footer className="py-4 px-6 border-t border-[#D5D4CB]/60 text-xs text-[#5F665E] text-center"> {/* taste-skill-ignore */}

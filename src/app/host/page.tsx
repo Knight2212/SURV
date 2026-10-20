@@ -17,6 +17,8 @@ import {
 } from '@/lib/store';
 import { Room } from '@/types';
 import QRCodeModal from '@/components/QRCodeModal';
+import ExportModal from '@/components/ExportModal';
+import { SessionExportData } from '@/lib/exportUtils';
 import {
   Radio,
   Plus,
@@ -93,6 +95,7 @@ export default function HostSessionsPage() {
   // Toast Notification State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedPin, setCopiedPin] = useState<string | null>(null);
+  const [exportingSessionData, setExportingSessionData] = useState<SessionExportData | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -222,22 +225,13 @@ export default function HostSessionsPage() {
     showToast('Session deleted.');
   };
 
-  // Handler: Export Session Data
-  const handleExport = (roomId: string, title: string, e?: React.MouseEvent) => {
+  // Handler: Export Session Data (Excel, CSV, JSON)
+  const handleExport = (roomId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     setActiveDropdownId(null);
     const data = exportRoomData(roomId);
     if (!data) return;
-
-    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', jsonString);
-    downloadAnchor.setAttribute('download', `surv-session-${data.room.pin}-${Date.now()}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-
-    showToast(`Exported "${title}" report (JSON).`);
+    setExportingSessionData(data as any);
   };
 
   // Handler: Copy PIN
@@ -689,11 +683,11 @@ export default function HostSessionsPage() {
                               </button>
 
                               <button
-                                onClick={e => handleExport(room.id, room.title, e)}
+                                onClick={e => handleExport(room.id, e)}
                                 className="w-full px-3 py-1.5 text-xs text-left text-[#E6E5DC] hover:text-white hover:bg-[#233B31] rounded flex items-center gap-2 cursor-pointer"
                               >
                                 <Download size={13} className="text-[#c6f19d]" />
-                                <span>Export Report (JSON)</span>
+                                <span>Export (Excel, CSV, JSON)</span>
                               </button>
 
                               <div className="my-1" />
@@ -1201,6 +1195,16 @@ export default function HostSessionsPage() {
           onClose={() => setSelectedQRRoom(null)}
           pin={selectedQRRoom.pin}
           title={selectedQRRoom.title}
+        />
+      )}
+
+      {/* EXPORT MODAL (EXCEL, CSV, JSON) */}
+      {exportingSessionData && (
+        <ExportModal
+          isOpen={Boolean(exportingSessionData)}
+          onClose={() => setExportingSessionData(null)}
+          data={exportingSessionData}
+          onExportSuccess={format => showToast(`Exported "${exportingSessionData.room.title}" in ${format}.`)}
         />
       )}
 
