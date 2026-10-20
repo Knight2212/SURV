@@ -1399,25 +1399,31 @@ function HostRoomContent({ params }: HostRoomPageProps) {
         />
 
         {/* Session Data Export Modal (Excel, CSV, JSON) */}
-        {showExportModal && room && (
-          <ExportModal
-            isOpen={showExportModal}
-            onClose={() => setShowExportModal(false)}
-            data={{
-              room,
-              polls: polls.map(p => ({
-                ...p,
-                responses: getResponsesForPoll(p.id),
-              })),
-              qaQuestions: questions,
-              surveys: surveys.map(s => ({
-                ...s,
-                responses: getSurveyResponses(s.id),
-              })),
-              exportedAt: new Date().toISOString(),
-            }}
-          />
-        )}
+        {showExportModal && room && (() => {
+          const activePollsList = polls.length > 0 ? polls : getPollsForRoom(room.id);
+          const activeQAList = questions.length > 0 ? questions : getQAQuestions(room.id);
+          const activeSurveysList = surveys.length > 0 ? surveys : getSurveysForRoom(room.id);
+
+          return (
+            <ExportModal
+              isOpen={showExportModal}
+              onClose={() => setShowExportModal(false)}
+              data={{
+                room,
+                polls: activePollsList.map(p => ({
+                  ...p,
+                  responses: getResponsesForPoll(p.id),
+                })),
+                qaQuestions: activeQAList,
+                surveys: activeSurveysList.map(s => ({
+                  ...s,
+                  responses: getSurveyResponses(s.id),
+                })),
+                exportedAt: new Date().toISOString(),
+              }}
+            />
+          );
+        })()}
 
         {/* Footer */}
         <footer className="py-4 px-6 border-t border-[#D5D4CB]/60 text-xs text-[#5F665E] text-center"> {/* taste-skill-ignore */}

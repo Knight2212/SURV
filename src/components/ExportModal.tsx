@@ -97,6 +97,13 @@ export default function ExportModal({
             </div>
           </div>
 
+          {/* Empty state notice if session has 0 polls/qa/surveys */}
+          {data.polls.length === 0 && data.qaQuestions.length === 0 && data.surveys.length === 0 && (
+            <div className="mb-3 p-3 rounded-xl bg-[#DFDDD3] text-[11px] text-[#5F665E] leading-relaxed">
+              <strong className="text-[#181F1C]">Session is currently empty:</strong> No polls or Q&amp;A questions have been added to this session yet. The exported report will contain the session overview, structure, and headers. Add polls or generate AI questions to include live vote data.
+            </div>
+          )}
+
           {/* Export Options */}
           <div className="space-y-2.5">
             {/* 1. EXCEL WORKBOOK */}

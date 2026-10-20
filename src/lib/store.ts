@@ -411,17 +411,25 @@ export function getDashboardMetrics() {
   };
 }
 
-export function exportRoomData(roomId: string) {
-  const room = getRooms().find(r => r.id === roomId);
+export function exportRoomData(roomIdOrPin: string) {
+  const rooms = getRooms();
+  const cleanKey = roomIdOrPin.trim();
+  const room = rooms.find(
+    r =>
+      r.id === cleanKey ||
+      r.pin === cleanKey ||
+      r.pin.replace(/\s+/g, '-').trim() === cleanKey.replace(/\s+/g, '-').trim() ||
+      r.pin.replace(/[^0-9]/g, '') === cleanKey.replace(/[^0-9]/g, '')
+  );
   if (!room) return null;
 
-  const polls = getPollsForRoom(roomId);
+  const polls = getPollsForRoom(room.id);
   const pollsWithResponses = polls.map(p => ({
     ...p,
     responses: getResponsesForPoll(p.id),
   }));
-  const qa = getQAQuestions(roomId);
-  const surveys = getSurveysForRoom(roomId).map(s => ({
+  const qa = getQAQuestions(room.id);
+  const surveys = getSurveysForRoom(room.id).map(s => ({
     ...s,
     responses: getSurveyResponses(s.id),
   }));
@@ -437,11 +445,29 @@ export function exportRoomData(roomId: string) {
 
 // ----------------- POLLS API -----------------
 
-export function getPollsForRoom(roomId: string): Poll[] {
+export function getPollsForRoom(roomIdOrPin: string): Poll[] {
   initializeStore();
   const allPolls = readLocal<Poll[]>('polls', []);
+  const allRooms = getRooms();
+  const cleanKey = roomIdOrPin.trim();
+  const matchingRoom = allRooms.find(
+    r =>
+      r.id === cleanKey ||
+      r.pin === cleanKey ||
+      r.pin.replace(/\s+/g, '-').trim() === cleanKey.replace(/\s+/g, '-').trim() ||
+      r.pin.replace(/[^0-9]/g, '') === cleanKey.replace(/[^0-9]/g, '')
+  );
+
+  const validIds = new Set<string>([cleanKey]);
+  if (matchingRoom) {
+    validIds.add(matchingRoom.id);
+    validIds.add(matchingRoom.pin);
+    validIds.add(matchingRoom.pin.replace(/\s+/g, '-').trim());
+    validIds.add(matchingRoom.pin.replace(/[^0-9]/g, ''));
+  }
+
   return allPolls
-    .filter(p => p.roomId === roomId)
+    .filter(p => validIds.has(p.roomId))
     .sort((a, b) => a.order - b.order);
 }
 
@@ -543,11 +569,29 @@ export function resetPollResponses(pollId: string): void {
 
 // ----------------- Q&A API -----------------
 
-export function getQAQuestions(roomId: string): QAQuestion[] {
+export function getQAQuestions(roomIdOrPin: string): QAQuestion[] {
   initializeStore();
   const allQA = readLocal<QAQuestion[]>('qa', []);
+  const allRooms = getRooms();
+  const cleanKey = roomIdOrPin.trim();
+  const matchingRoom = allRooms.find(
+    r =>
+      r.id === cleanKey ||
+      r.pin === cleanKey ||
+      r.pin.replace(/\s+/g, '-').trim() === cleanKey.replace(/\s+/g, '-').trim() ||
+      r.pin.replace(/[^0-9]/g, '') === cleanKey.replace(/[^0-9]/g, '')
+  );
+
+  const validIds = new Set<string>([cleanKey]);
+  if (matchingRoom) {
+    validIds.add(matchingRoom.id);
+    validIds.add(matchingRoom.pin);
+    validIds.add(matchingRoom.pin.replace(/\s+/g, '-').trim());
+    validIds.add(matchingRoom.pin.replace(/[^0-9]/g, ''));
+  }
+
   return allQA
-    .filter(q => q.roomId === roomId)
+    .filter(q => validIds.has(q.roomId))
     .sort((a, b) => {
       // Pinned first, then upvotes descending, then timestamp descending
       if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
@@ -636,10 +680,28 @@ export function deleteQAQuestion(questionId: string): void {
 
 // ----------------- SURVEYS API -----------------
 
-export function getSurveysForRoom(roomId: string): Survey[] {
+export function getSurveysForRoom(roomIdOrPin: string): Survey[] {
   initializeStore();
   const allSurveys = readLocal<Survey[]>('surveys', []);
-  return allSurveys.filter(s => s.roomId === roomId);
+  const allRooms = getRooms();
+  const cleanKey = roomIdOrPin.trim();
+  const matchingRoom = allRooms.find(
+    r =>
+      r.id === cleanKey ||
+      r.pin === cleanKey ||
+      r.pin.replace(/\s+/g, '-').trim() === cleanKey.replace(/\s+/g, '-').trim() ||
+      r.pin.replace(/[^0-9]/g, '') === cleanKey.replace(/[^0-9]/g, '')
+  );
+
+  const validIds = new Set<string>([cleanKey]);
+  if (matchingRoom) {
+    validIds.add(matchingRoom.id);
+    validIds.add(matchingRoom.pin);
+    validIds.add(matchingRoom.pin.replace(/\s+/g, '-').trim());
+    validIds.add(matchingRoom.pin.replace(/[^0-9]/g, ''));
+  }
+
+  return allSurveys.filter(s => validIds.has(s.roomId));
 }
 
 export function submitSurveyResponse(data: {
